@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golden Signature Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --gold-dim: #6B5520;
+  --bg: #0A0A08;
+  --bg2: #111110;
+  --bg3: #1A1A17;
+  --border: #2A2A24;
+  --text: #E8E4D9;
+  --text-dim: #7A7567;
+  --green: #4CAF7A;
+  --red: #CF5B4A;
+  --blue: #4A8BCF;
+  --amber: #CF944A;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* NOISE TEXTURE */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* HEADER */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: rgba(10,10,8,0.92);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-mark {
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transform: rotate(45deg);
+}
+
+.logo-mark::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: var(--gold);
+  transform: rotate(-45deg);
+}
+
+.logo-text {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.logo-text span { color: var(--gold); }
+
+nav { display: flex; gap: 4px; }
+
+nav button {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  padding: 7px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+nav button:hover, nav button.active {
+  color: var(--text);
+  border-color: var(--border);
+  background: var(--bg2);
+}
+
+nav button.active { color: var(--gold); border-color: var(--gold-dim); }
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid var(--green);
+  font-size: 11px;
+  color: var(--green);
+  letter-spacing: 0.05em;
+}
+
+.pulse {
+  width: 6px;
+  height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* MAIN LAYOUT */
+main { display: flex; min-height: calc(100vh - 65px); }
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  flex-shrink: 0;
+}
+
+.sidebar-section { margin-bottom: 28px; }
+
+.sidebar-label {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  padding: 0 20px;
+  margin-bottom: 8px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+
+.sidebar-item:hover { color: var(--text); background: var(--bg2); }
+.sidebar-item.active { color: var(--gold); border-left-color: var(--gold); background: rgba(201,168,76,0.06); }
+
+.sidebar-item svg { width: 14px; height: 14px; opacity: 0.7; }
+.sidebar-item.active svg { opacity: 1; }
+
+.batch-mini {
+  margin: 0 14px;
+  padding: 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+}
+
+.batch-mini-label { font-size: 9px; color: var(--text-dim); letter-spacing: 0.1em; margin-bottom: 8px; }
+.batch-mini-id { font-size: 13px; color: var(--gold); margin-bottom: 6px; }
+.batch-mini-progress { height: 3px; background: var(--border); margin-bottom: 4px; }
+.batch-mini-bar {
+  height: 100%;
+  background: var(--gold);
+  width: 68%;
+  animation: progress-grow 3s ease-in-out infinite alternate;
+}
+@keyframes progress-grow {
+  from { width: 65%; }
+  to { width: 72%; }
+}
+.batch-mini-pct { font-size: 10px; color: var(--text-dim); }
+
+/* CONTENT AREA */
+.content { flex: 1; padding: 28px; overflow-y: auto; }
+
+/* PAGE SECTIONS */
+.page { display: none; }
+.page.active { display: block; }
+
+/* SCORE HERO */
+.score-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  margin-bottom: 28px;
+  border: 1px solid var(--border);
+}
+
+.score-card {
+  background: var(--bg2);
+  padding: 22px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.score-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.score-card.gold::before { background: var(--gold); }
+.score-card.green::before { background: var(--green); }
+.score-card.red::before { background: var(--red); }
+.score-card.blue::before { background: var(--blue); }
+
+.score-label { font-size: 9px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+.score-value { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
+.score-card.gold .score-value { color: var(--gold); }
+.score-card.green .score-value { color: var(--green); }
+.score-card.red .score-value { color: var(--red); }
+.score-card.blue .score-value { color: var(--blue); }
+.score-delta { font-size: 11px; color: var(--text-dim); }
+.score-delta.up { color: var(--green); }
+.score-delta.down { color: var(--red); }
+
+/* GOLDEN SIGNATURE PANEL */
+.gs-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 20px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.badge {
+  font-size: 9px;
+  padding: 3px 8px;
+  border: 1px solid;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.badge.gold { color: var(--gold); border-color: var(--gold-dim); background: rgba(201,168,76,0.08); }
+.badge.green { color: var(--green); border-color: rgba(76,175,122,0.4); }
+.badge.red { color: var(--red); border-color: rgba(207,91,74,0.4); }
+.badge.amber { color: var(--amber); border-color: rgba(207,148,74,0.4); }
+
+/* PARAMETER ROWS */
+.param-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(42,42,36,0.5);
+  font-size: 12px;
+}
+
+.param-row:last-child { border-bottom: none; }
+
+.param-name { width: 110px; color: var(--text-dim); font-size: 11px; }
+.param-value { width: 70px; }
+.param-value.gold { color: var(--gold); }
+
+.param-bar-wrap { flex: 1; height: 4px; background: var(--border); position: relative; }
+.param-bar { height: 100%; transition: width 1s ease; }
+.param-bar.good { background: var(--green); }
+.param-bar.warn { background: var(--amber); }
+.param-bar.bad { background: var(--red); }
+
+.param-status { width: 50px; text-align: right; font-size: 10px; }
+.param-status.good { color: var(--green); }
+.param-status.warn { color: var(--amber); }
+.param-status.bad { color: var(--red); }
+
+/* ALERT / RECOMMENDATION CARD */
+.recommendation-card {
+  background: var(--bg2);
+  border: 1px solid var(--amber);
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.recommendation-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--amber);
+}
+
+.rec-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.rec-icon { font-size: 16px; }
+.rec-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
+.rec-confidence { margin-left: auto; font-size: 10px; color: var(--text-dim); }
+
+.rec-body { font-size: 12px; color: var(--text-dim); line-height: 1.7; margin-bottom: 14px; }
+.rec-body strong { color: var(--text); }
+
+.rec-actions { display: flex; gap: 10px; }
+
+.btn {
+  padding: 9px 18px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid;
+  text-transform: uppercase;
+}
+
+.btn-accept { background: rgba(76,175,122,0.1); border-color: var(--green); color: var(--green); }
+.btn-accept:hover { background: rgba(76,175,122,0.2); }
+.btn-reject { background: none; border-color: var(--border); color: var(--text-dim); }
+.btn-reject:hover { border-color: var(--red); color: var(--red); }
+.btn-modify { background: none; border-color: var(--border); color: var(--text-dim); }
+.btn-modify:hover { border-color: var(--blue); color: var(--blue); }
+.btn-gold { background: rgba(201,168,76,0.1); border-color: var(--gold); color: var(--gold); }
+.btn-gold:hover { background: rgba(201,168,76,0.2); }
+
+/* LIVE CHART */
+.chart-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+canvas { width: 100% !important; max-height: 180px; }
+
+/* OBJECTIVES PANEL */
+.objectives-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.obj-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(42,42,36,0.4);
+}
+.obj-row:last-child { border-bottom: none; }
+
+.obj-name { width: 120px; font-size: 12px; }
+.obj-slider { flex: 1; -webkit-appearance: none; height: 3px; background: var(--border); outline: none; }
+.obj-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  background: var(--gold);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+.obj-pct { width: 40px; text-align: right; font-size: 12px; color: var(--gold); }
+
+/* SIGNATURE TABLE */
+.sig-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.sig-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+.sig-table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(42,42,36,0.4);
+}
+.sig-table tr:hover td { background: rgba(255,255,255,0.02); }
+.sig-table .active-row td { background: rgba(201,168,76,0.04); }
+
+/* BATCH TIMELINE */
+.timeline {
+  position: relative;
+  padding-left: 24px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px; top: 8px; bottom: 8px;
+  width: 1px;
+  background: var(--border);
+}
+.timeline-item {
+  position: relative;
+  padding: 0 0 20px 20px;
+  font-size: 12px;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 5px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  border: 2px solid var(--bg);
+}
+.timeline-item.done::before { background: var(--green); }
+.timeline-item.active::before { background: var(--gold); animation: pulse 2s infinite; }
+.timeline-item.warn::before { background: var(--amber); }
+
+.timeline-time { font-size: 10px; color: var(--text-dim); margin-bottom: 3px; }
+.timeline-text { color: var(--text); line-height: 1.5; }
+.timeline-text strong { color: var(--gold); }
+
+/* GRID UTILITIES */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+/* SECTION HEADER */
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+}
+.section-sub { font-size: 11px; color: var(--text-dim); }
+
+/* MINI STAT */
+.mini-stat {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 16px;
+}
+.mini-stat-label { font-size: 9px; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+.mini-stat-value { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* LEARN LOG */
+.learn-row {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  align-items: flex-start;
+}
+.learn-row:hover { background: var(--bg3); }
+.learn-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.learn-content { flex: 1; }
+.learn-outcome { color: var(--green); margin-left: auto; flex-shrink: 0; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--gold-dim);
+  padding: 28px;
+  width: 480px;
+  max-width: 90vw;
+  animation: slideIn 0.3s ease;
+}
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-body { font-size: 12px; color: var(--text-dim); line-height: 1.8; margin-bottom: 20px; }
+.modal-body strong { color: var(--text); }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* INPUT */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.input-label { font-size: 11px; color: var(--text-dim); width: 120px; }
+input[type=number] {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  padding: 8px 12px;
+  width: 100px;
+  outline: none;
+}
+input[type=number]:focus { border-color: var(--gold-dim); }
+
+/* Notification toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg2);
+  border: 1px solid var(--green);
+  padding: 14px 20px;
+  font-size: 12px;
+  color: var(--green);
+  z-index: 300;
+  display: none;
+  animation: slideIn 0.3s ease;
+}
+.toast.show { display: block; }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-mark"></div>
+    <div>
+      <div class="logo-text">Golden <span>Signature</span> Framework</div>
+      <div style="font-size:9px;color:var(--text-dim);letter-spacing:0.1em;margin-top:2px;">MANUFACTURING OPTIMIZATION ENGINE</div>
+    </div>
+  </div>
+  <nav>
+    <button class="active" onclick="showPage('dashboard',this)">Dashboard</button>
+    <button onclick="showPage('signatures',this)">Signatures</button>
+    <button onclick="showPage('optimizer',this)">Optimizer</button>
+    <button onclick="showPage('learning',this)">Learning</button>
+    <button onclick="showPage('batch',this)">Batch Sim</button>
+  </nav>
+  <div class="status-pill">
+    <div class="pulse"></div>
+    LIVE — BATCH B-2024-0412
+  </div>
+</header>
+
+<main>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Production</div>
+      <div class="sidebar-item active" onclick="showPage('dashboard', null)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Live Dashboard
+      </div>
+      <div class="sidebar-item" onclick="showPage('batch',null)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Batch Simulator
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Optimization</div>
+      <div class="sidebar-item" onclick="showPage('signatures',null)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Golden Signatures
+      </div>
+      <div class="sidebar-item" onclick="showPage('optimizer',null)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Objective Tuning
+      </div>
+      <div class="sidebar-item" onclick="showPage('learning',null)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Learning Log
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Active Batch</div>
+      <div class="batch-mini">
+        <div class="batch-mini-label">CURRENT RUN</div>
+        <div class="batch-mini-id">B-2024-0412</div>
+        <div class="batch-mini-progress"><div class="batch-mini-bar"></div></div>
+        <div class="batch-mini-pct" id="batch-pct">68% complete</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <!-- ======== DASHBOARD PAGE ======== -->
+    <div class="page active" id="page-dashboard">
+      <div class="section-header">
+        <div class="section-title">Live Production Dashboard</div>
+        <div class="section-sub">Batch B-2024-0412 · Product Line A · Started 06:00</div>
+      </div>
+
+      <!-- SCORES -->
+      <div class="score-hero">
+        <div class="score-card gold">
+          <div class="score-label">Composite Score</div>
+          <div class="score-value" id="comp-score">90.4</div>
+          <div class="score-delta up" id="comp-delta">▲ +1.1 vs last check</div>
+        </div>
+        <div class="score-card green">
+          <div class="score-label">Yield %</div>
+          <div class="score-value" id="yield-val">93.1</div>
+          <div class="score-delta up">▲ +0.4% from GS target</div>
+        </div>
+        <div class="score-card red">
+          <div class="score-label">Energy kWh/unit</div>
+          <div class="score-value" id="energy-val">2.44</div>
+          <div class="score-delta down">▼ +0.13 above GS target</div>
+        </div>
+        <div class="score-card blue">
+          <div class="score-label">GS Benchmark</div>
+          <div class="score-value">91.3</div>
+          <div class="score-delta" style="color:var(--text-dim)">GS-2024-047 · Active</div>
+        </div>
+      </div>
+
+      <!-- RECOMMENDATION CARD -->
+      <div class="recommendation-card" id="rec-card">
+        <div class="rec-header">
+          <span class="rec-icon">⚠️</span>
+          <div class="rec-title">Deviation Detected — Temperature Drift</div>
+          <div class="rec-confidence">Confidence: <span style="color:var(--amber)">87%</span> · 23 similar batches</div>
+        </div>
+        <div class="rec-body">
+          Temperature currently at <strong>347°C</strong> (target: <strong>342°C</strong>, drift: <strong>+5°C</strong>).
+          Impact: yield projected to drop <strong>2.1%</strong> if uncorrected over next 8 minutes.
+          Highest-impact parameter per SHAP analysis (contributing <strong>47%</strong> to current deviation score).<br><br>
+          Recommendation: Reduce temperature setpoint to <strong>341°C</strong> (conservative undershoot to compensate for thermal lag).
+        </div>
+        <div class="rec-actions">
+          <button class="btn btn-accept" onclick="acceptRec()">✓ Accept</button>
+          <button class="btn btn-reject" onclick="rejectRec()">✗ Reject</button>
+          <button class="btn btn-modify" onclick="openModifyModal()">✎ Modify</button>
+          <button class="btn btn-modify" onclick="openExplainModal()">📋 Explain More</button>
+        </div>
+      </div>
+
+      <!-- LIVE CHART -->
+      <div class="chart-wrap" style="margin-bottom:20px;">
+        <div class="panel-header" style="margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+          <div class="panel-title">Live Parameter Tracking</div>
+          <div class="badge gold">vs Golden Signature</div>
+        </div>
+        <canvas id="liveChart"></canvas>
+      </div>
+
+      <!-- PARAMETER GRID -->
+      <div class="gs-panel">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Current vs Golden Signature</div>
+            <div class="badge gold">GS-2024-047</div>
+          </div>
+          <div class="param-row">
+            <div class="param-name">Temperature</div>
+            <div class="param-value" style="color:var(--red)">347°C</div>
+            <div class="param-bar-wrap"><div class="param-bar bad" style="width:76%"></div></div>
+            <div class="param-status bad">+5°C</div>
+          </div>
+          <div class="param-row">
+            <div class="param-name">Pressure</div>
+            <div class="param-value" style="color:var(--green)">18.4 bar</div>
+            <div class="param-bar-wrap"><div class="param-bar good" style="width:88%"></div></div>
+            <div class="param-status good">✓ OK</div>
+          </div>
+          <div class="param-row">
+            <div class="param-name">Feed Rate</div>
+            <div class="param-value" style="color:var(--amber)">114 kg/hr</div>
+            <div class="param-bar-wrap"><div class="param-bar warn" style="width:62%"></div></div>
+            <div class="param-status warn">−6</div>
+          </div>
+          <div class="param-row">
+            <div class="param-name">Coolant Flow</div>
+            <div class="param-value" style="color:var(--green)">45 L/min</div>
+            <div class="param-bar-wrap"><div class="param-bar good" style="width:92%"></div></div>
+            <div class="param-status good">✓ OK</div>
+          </div>
+          <div class="param-row">
+            <div class="param-name">Emissions</div>
+            <div class="param-value" style="color:var(--amber)">0.21 kg</div>
+            <div class="param-bar-wrap"><div class="param-bar warn" style="width:55%"></div></div>
+            <div class="param-status warn">+0.03</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">SHAP Impact Ranking</div>
+            <div class="badge amber">Fix in this order</div>
+          </div>
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:14px;">
+            Parameters ranked by impact on composite score deviation
+          </div>
+          <div class="param-row">
+            <div class="param-name">① Temperature</div>
+            <div class="param-bar-wrap"><div class="param-bar bad" style="width:90%"></div></div>
+            <div class="param-status bad">47%</div>
+          </div>
+          <div class="param-row">
+            <div class="param-name">② Feed Rate</div>
+            <div class="param-bar-wrap"><div class="param-bar warn" style="width:58%"></div></div>
+            <div class="param-status warn">31%</div>
+          </div>
+          <div class="param-row">
+            <div class="param-name">③ Emissions</div>
+            <div class="param-bar-wrap"><div class="param-bar warn" style="width:38%"></div></div>
+            <div class="param-status warn">15%</div>
+          </div>
+          <div class="param-row">
+            <div class="param-name">④ Pressure</div>
+            <div class="param-bar-wrap"><div class="param-bar good" style="width:14%"></div></div>
+            <div class="param-status good">5%</div>
+          </div>
+          <div class="param-row">
+            <div class="param-name">⑤ Coolant</div>
+            <div class="param-bar-wrap"><div class="param-bar good" style="width:5%"></div></div>
+            <div class="param-status good">2%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== SIGNATURES PAGE ======== -->
+    <div class="page" id="page-signatures">
+      <div class="section-header">
+        <div class="section-title">Golden Signature Library</div>
+        <div class="section-sub">Historical benchmarks · Auto-updating</div>
+      </div>
+
+      <div class="grid-3">
+        <div class="mini-stat">
+          <div class="mini-stat-label">Active Signatures</div>
+          <div class="mini-stat-value" style="color:var(--gold)">4</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Batches Compared</div>
+          <div class="mini-stat-value" style="color:var(--blue)">1,847</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Last Updated</div>
+          <div class="mini-stat-value" style="font-size:16px;color:var(--text)">3d ago</div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-header">
+          <div class="panel-title">All Golden Signatures</div>
+          <button class="btn btn-gold" onclick="showToast('New signature wizard coming soon')">+ New Objective Profile</button>
+        </div>
+        <table class="sig-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Objective Profile</th>
+              <th>Yield %</th>
+              <th>Energy kWh</th>
+              <th>Emissions kg</th>
+              <th>Composite</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="active-row">
+              <td style="color:var(--gold)">GS-2024-047</td>
+              <td>Yield 60% · Energy 30% · Emissions 10%</td>
+              <td style="color:var(--green)">94.7%</td>
+              <td>2.31</td>
+              <td>0.18</td>
+              <td style="color:var(--gold)">91.3</td>
+              <td><span class="badge gold">ACTIVE</span></td>
+              <td><button class="btn btn-gold" style="padding:4px 10px;font-size:9px">View</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--text-dim)">GS-2024-031</td>
+              <td>Speed 70% · Yield 30%</td>
+              <td style="color:var(--green)">92.1%</td>
+              <td>2.81</td>
+              <td>0.24</td>
+              <td>88.4</td>
+              <td><span class="badge" style="color:var(--text-dim);border-color:var(--border)">ARCHIVED</span></td>
+              <td><button class="btn btn-modify" style="padding:4px 10px;font-size:9px">View</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--text-dim)">GS-2024-019</td>
+              <td>Emissions 50% · Energy 50%</td>
+              <td>89.3%</td>
+              <td style="color:var(--green)">1.94</td>
+              <td style="color:var(--green)">0.11</td>
+              <td>87.2</td>
+              <td><span class="badge green">ACTIVE</span></td>
+              <td><button class="btn btn-modify" style="padding:4px 10px;font-size:9px">View</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--text-dim)">GS-2023-088</td>
+              <td>Balanced — equal weights</td>
+              <td>91.0%</td>
+              <td>2.52</td>
+              <td>0.19</td>
+              <td>86.7</td>
+              <td><span class="badge green">ACTIVE</span></td>
+              <td><button class="btn btn-modify" style="padding:4px 10px;font-size:9px">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gs-panel">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">GS-2024-047 Parameters</div>
+            <div class="badge gold">ACTIVE BENCHMARK</div>
+          </div>
+          <div class="param-row"><div class="param-name">Temperature</div><div class="param-value gold">342°C</div><div style="font-size:10px;color:var(--text-dim);margin-left:auto">±2°C tolerance</div></div>
+          <div class="param-row"><div class="param-name">Pressure</div><div class="param-value gold">18.4 bar</div><div style="font-size:10px;color:var(--text-dim);margin-left:auto">±0.3 tolerance</div></div>
+          <div class="param-row"><div class="param-name">Feed Rate</div><div class="param-value gold">120 kg/hr</div><div style="font-size:10px;color:var(--text-dim);margin-left:auto">±5 tolerance</div></div>
+          <div class="param-row"><div class="param-name">Coolant Flow</div><div class="param-value gold">45 L/min</div><div style="font-size:10px;color:var(--text-dim);margin-left:auto">±1 tolerance</div></div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:10px;color:var(--text-dim);">
+            Source batch: BATCH-20241115-003 · Validated by op_072 · Times beaten: 0
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Benchmark Update Logic</div>
+            <div class="badge amber">THRESHOLD +1.5 pts</div>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">
+            A new batch must score <strong style="color:var(--text)">92.8 or above</strong> to trigger a review.<br><br>
+            Near-miss zone (91.3–92.8): logged but not promoted.<br><br>
+            Above 92.8: flagged for operator approval → archive current → promote new.<br><br>
+          </div>
+          <div style="margin-top:14px;">
+            <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">Recent near-misses</div>
+            <div style="font-size:11px;color:var(--amber)">B-2024-0409 → 91.8 pts (near-miss +0.5)</div>
+            <div style="font-size:11px;color:var(--amber);margin-top:4px;">B-2024-0401 → 91.6 pts (near-miss +0.3)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== OPTIMIZER PAGE ======== -->
+    <div class="page" id="page-optimizer">
+      <div class="section-header">
+        <div class="section-title">Objective Tuning</div>
+        <div class="section-sub">Adjust production priorities · Changes apply immediately</div>
+      </div>
+
+      <div class="gs-panel">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Today's Priority Profile</div>
+            <div class="badge amber">OPERATOR CONTROL</div>
+          </div>
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Drag sliders to reprioritize. Total weighting auto-normalizes.</div>
+
+          <div class="objectives-panel" style="border:none;padding:0;margin-bottom:0;">
+            <div class="obj-row">
+              <div class="obj-name">Yield</div>
+              <input type="range" class="obj-slider" min="0" max="100" value="60" oninput="updateObj('yield-pct',this.value)">
+              <div class="obj-pct" id="yield-pct">60%</div>
+            </div>
+            <div class="obj-row">
+              <div class="obj-name">Energy Efficiency</div>
+              <input type="range" class="obj-slider" min="0" max="100" value="30" oninput="updateObj('energy-pct',this.value)">
+              <div class="obj-pct" id="energy-pct">30%</div>
+            </div>
+            <div class="obj-row">
+              <div class="obj-name">Carbon Emissions</div>
+              <input type="range" class="obj-slider" min="0" max="100" value="10" oninput="updateObj('emission-pct',this.value)">
+              <div class="obj-pct" id="emission-pct">10%</div>
+            </div>
+            <div class="obj-row">
+              <div class="obj-name">Speed / Throughput</div>
+              <input type="range" class="obj-slider" min="0" max="100" value="0" oninput="updateObj('speed-pct',this.value)">
+              <div class="obj-pct" id="speed-pct">0%</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:18px;">
+            <button class="btn btn-gold" onclick="saveObjectives()">Save Profile</button>
+            <button class="btn btn-modify" onclick="loadPreset('sustainability')">🌱 Sustainability Preset</button>
+            <button class="btn btn-modify" onclick="loadPreset('speed')">⚡ Speed Preset</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Algorithm Engine</div>
+            <div class="badge blue">NSGA-II ACTIVE</div>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);line-height:1.9;">
+            <strong style="color:var(--text)">NSGA-II</strong> — Core multi-objective solver. Finds Pareto-optimal trade-off curve across all objectives.<br><br>
+            <strong style="color:var(--text)">PID Control</strong> — Real-time deviation correction during running batches. Same logic as a smart thermostat.<br><br>
+            <strong style="color:var(--text)">Bayesian Optimizer</strong> — Explores new parameter ranges safely. Activates on new product lines.<br><br>
+            <strong style="color:var(--text)">SHAP Explainer</strong> — Ranks parameter impact in plain language so operators know what to fix first.
+          </div>
+          <div style="margin-top:16px;padding:12px;background:var(--bg3);font-size:10px;color:var(--text-dim);">
+            Last solver run: <span style="color:var(--gold)">07:14:32</span> · Solutions evaluated: <span style="color:var(--text)">1,240</span> · Runtime: <span style="color:var(--green)">0.8s</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Pareto-Optimal Solution Set</div>
+          <div class="badge gold">NSGA-II output — choose your trade-off</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Each row is Pareto-optimal: no other solution is better on ALL dimensions simultaneously. Choose based on today's priority.</div>
+        <table class="sig-table">
+          <thead>
+            <tr><th>Option</th><th>Temperature</th><th>Pressure</th><th>Feed Rate</th><th>Yield</th><th>Energy</th><th>Emissions</th><th>Composite</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr class="active-row">
+              <td style="color:var(--gold)">A ★ Recommended</td>
+              <td>342°C</td><td>18.4 bar</td><td>120 kg/hr</td>
+              <td style="color:var(--green)">94.7%</td><td>2.31</td><td>0.18 kg</td>
+              <td style="color:var(--gold)">91.3</td>
+              <td><button class="btn btn-gold" style="padding:4px 10px;font-size:9px" onclick="showToast('Option A applied as target')">Apply</button></td>
+            </tr>
+            <tr>
+              <td>B — Max Yield</td>
+              <td>349°C</td><td>19.1 bar</td><td>125 kg/hr</td>
+              <td style="color:var(--green)">96.2%</td><td>2.71</td><td>0.23 kg</td>
+              <td>89.1</td>
+              <td><button class="btn btn-modify" style="padding:4px 10px;font-size:9px" onclick="showToast('Option B applied as target')">Apply</button></td>
+            </tr>
+            <tr>
+              <td>C — Min Energy</td>
+              <td>335°C</td><td>17.2 bar</td><td>108 kg/hr</td>
+              <td>90.1%</td><td style="color:var(--green)">1.98</td><td style="color:var(--green)">0.14 kg</td>
+              <td>88.4</td>
+              <td><button class="btn btn-modify" style="padding:4px 10px;font-size:9px" onclick="showToast('Option C applied as target')">Apply</button></td>
+            </tr>
+            <tr>
+              <td>D — Min Emissions</td>
+              <td>330°C</td><td>16.8 bar</td><td>102 kg/hr</td>
+              <td>87.4%</td><td>2.10</td><td style="color:var(--green)">0.09 kg</td>
+              <td>85.7</td>
+              <td><button class="btn btn-modify" style="padding:4px 10px;font-size:9px" onclick="showToast('Option D applied as target')">Apply</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ======== LEARNING PAGE ======== -->
+    <div class="page" id="page-learning">
+      <div class="section-header">
+        <div class="section-title">Operator Learning Log</div>
+        <div class="section-sub">Every decision stored · Weekly model retraining</div>
+      </div>
+
+      <div class="grid-3">
+        <div class="mini-stat">
+          <div class="mini-stat-label">Decisions Logged</div>
+          <div class="mini-stat-value" style="color:var(--gold)">342</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Operator Overrides Beat AI</div>
+          <div class="mini-stat-value" style="color:var(--green)">67%</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Unlearned Decisions</div>
+          <div class="mini-stat-value" style="color:var(--amber)">14</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Decision History</div>
+          <button class="btn btn-gold" onclick="showToast('Retraining job queued for tonight 02:00')">Trigger Retraining</button>
+        </div>
+        <div id="learn-log">
+          <div class="learn-row">
+            <div class="learn-dot" style="background:var(--green)"></div>
+            <div class="learn-content">
+              <div style="color:var(--text);margin-bottom:3px;"><strong>ACCEPT</strong> · Temperature correction 347→341°C · op_019 · Batch B-2024-0412</div>
+              <div style="color:var(--text-dim)">AI recommended: 341°C · Operator accepted as-is · 07:12 today</div>
+            </div>
+            <div class="learn-outcome">+2.1% yield</div>
+          </div>
+          <div class="learn-row">
+            <div class="learn-dot" style="background:var(--blue)"></div>
+            <div class="learn-content">
+              <div style="color:var(--text);margin-bottom:3px;"><strong>MODIFY</strong> · Pressure correction 17.8→18.5°C overridden to 18.3 · op_019 · Batch B-2024-0409</div>
+              <div style="color:var(--text-dim)">AI recommended: 18.5 bar · Operator set: 18.3 bar · Outcome was better → learning queued</div>
+            </div>
+            <div class="learn-outcome" style="color:var(--blue)">Pending</div>
+          </div>
+          <div class="learn-row">
+            <div class="learn-dot" style="background:var(--red)"></div>
+            <div class="learn-content">
+              <div style="color:var(--text);margin-bottom:3px;"><strong>REJECT</strong> · Feed rate reduction 120→108 kg/hr · op_072 · Batch B-2024-0401</div>
+              <div style="color:var(--text-dim)">AI recommended: 108 kg/hr · Operator kept at 120 · Yield was 0.8% lower → AI was right</div>
+            </div>
+            <div class="learn-outcome" style="color:var(--red)">−0.8% yield</div>
+          </div>
+          <div class="learn-row">
+            <div class="learn-dot" style="background:var(--green)"></div>
+            <div class="learn-content">
+              <div style="color:var(--text);margin-bottom:3px;"><strong>ACCEPT</strong> · Coolant flow 43→45 L/min · op_019 · Batch B-2024-0398</div>
+              <div style="color:var(--text-dim)">AI recommended: 45 L/min · Accepted · Emissions reduced by 0.02 kg/unit</div>
+            </div>
+            <div class="learn-outcome">−0.02 kg CO₂</div>
+          </div>
+          <div class="learn-row">
+            <div class="learn-dot" style="background:var(--blue)"></div>
+            <div class="learn-content">
+              <div style="color:var(--text);margin-bottom:3px;"><strong>MODIFY</strong> · Objectives reprioritized · op_019 · Session 2024-11-28</div>
+              <div style="color:var(--text-dim)">Operator shifted energy weight from 30% to 45% for regulatory compliance window (Mon 06:00–18:00)</div>
+            </div>
+            <div class="learn-outcome" style="color:var(--blue)">Profile saved</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== BATCH SIM PAGE ======== -->
+    <div class="page" id="page-batch">
+      <div class="section-header">
+        <div class="section-title">Batch Run Simulator</div>
+        <div class="section-sub">Step through a full batch lifecycle · See system decisions in real time</div>
+      </div>
+
+      <div class="gs-panel">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Batch Timeline — B-2024-0412</div>
+            <div class="badge green">68% COMPLETE</div>
+          </div>
+          <div class="timeline" id="batch-timeline">
+            <div class="timeline-item done">
+              <div class="timeline-time">06:00</div>
+              <div class="timeline-text">Batch started. Operator selected <strong>Product Line A</strong>. Golden Signature GS-2024-047 loaded. Yield-heavy profile active.</div>
+            </div>
+            <div class="timeline-item done">
+              <div class="timeline-time">06:00–06:45</div>
+              <div class="timeline-text">Steady state. All parameters within tolerance. Composite tracking at <strong>89.1</strong> vs GS benchmark 91.3.</div>
+            </div>
+            <div class="timeline-item warn">
+              <div class="timeline-time">07:12</div>
+              <div class="timeline-text">⚠️ Temperature drift detected: <strong>+5°C</strong>. SHAP ranked it highest-impact (47%). Recommendation card issued to operator.</div>
+            </div>
+            <div class="timeline-item done">
+              <div class="timeline-time">07:13</div>
+              <div class="timeline-text">Operator <strong>accepted</strong> temperature correction (341°C). Decision logged. Correction applied.</div>
+            </div>
+            <div class="timeline-item done">
+              <div class="timeline-time">07:18</div>
+              <div class="timeline-text">Temperature stabilized at 342°C. Yield projection recovered. Composite score climbed to <strong>90.4</strong>.</div>
+            </div>
+            <div class="timeline-item active">
+              <div class="timeline-time">NOW — 08:47</div>
+              <div class="timeline-text">Tracking at 90.4. Feed rate slight underperformance flagged as secondary deviation. Awaiting next correction decision.</div>
+            </div>
+            <div class="timeline-item" style="opacity:0.4">
+              <div class="timeline-time">~09:30 — Projected</div>
+              <div class="timeline-text">Batch complete. Score projection: 91.8 (near-miss territory). GS benchmark update review may trigger.</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel" style="margin-bottom:20px;">
+            <div class="panel-header">
+              <div class="panel-title">Next Decision Point</div>
+              <div class="badge amber">PENDING</div>
+            </div>
+            <div style="font-size:12px;color:var(--text-dim);line-height:1.8;margin-bottom:16px;">
+              Feed rate at <strong style="color:var(--text)">114 kg/hr</strong> (target: 120). Impact score: 31%.<br>
+              Recommendation: Increase to <strong style="color:var(--text)">122 kg/hr</strong>.
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-accept" onclick="advanceBatch('accept')">✓ Accept</button>
+              <button class="btn btn-reject" onclick="advanceBatch('reject')">✗ Reject</button>
+              <button class="btn btn-modify" onclick="advanceBatch('modify')">✎ Modify</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">End-of-Batch Projection</div>
+            </div>
+            <div class="param-row"><div class="param-name">Projected Score</div><div class="param-value" style="color:var(--gold)">91.8</div></div>
+            <div class="param-row"><div class="param-name">GS Benchmark</div><div class="param-value" style="color:var(--text-dim)">91.3</div></div>
+            <div class="param-row"><div class="param-name">Threshold to replace</div><div class="param-value" style="color:var(--text-dim)">92.8</div></div>
+            <div class="param-row"><div class="param-name">Status</div><div class="param-value" style="color:var(--amber);font-size:11px">Near-miss · Will log</div></div>
+            <div style="margin-top:12px;font-size:10px;color:var(--text-dim);">Batch will be logged as strong performance. No GS replacement unless operator nominates manually.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modify-modal">
+  <div class="modal">
+    <div class="modal-title">✎ Modify Recommendation</div>
+    <div class="modal-body">
+      AI recommends setting temperature to <strong>341°C</strong>. Adjust below if you want a different value.
+    </div>
+    <div class="input-row">
+      <div class="input-label">Temperature setpoint</div>
+      <input type="number" id="mod-temp" value="341" min="330" max="360">
+      <span style="font-size:12px;color:var(--text-dim)">°C</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-reject" onclick="closeModal('modify-modal')">Cancel</button>
+      <button class="btn btn-gold" onclick="applyModify()">Apply Modified Value</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="explain-modal">
+  <div class="modal">
+    <div class="modal-title">📋 Why Temperature First?</div>
+    <div class="modal-body">
+      <strong>SHAP Analysis — Batch B-2024-0412, 07:12</strong><br><br>
+      The current composite score deviation of <strong>0.9 points below benchmark</strong> is attributed to:<br><br>
+      • Temperature (+5°C drift) → <strong>47% of total deviation</strong><br>
+      • Feed rate (−6 kg/hr) → 31% of total deviation<br>
+      • Emissions (+0.03 kg) → 15% of total deviation<br>
+      • Other → 7%<br><br>
+      Temperature is fixed first because correcting it also indirectly improves emissions (they are thermally correlated in this product's process model). Fixing temperature first is expected to reduce the emission deviation by ~60% without any additional intervention.<br><br>
+      Based on 23 similar historical batches where temperature drifted by 4–6°C at this batch age.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" onclick="closeModal('explain-modal')">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// NAV
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+// TOAST
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✓ ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// MODALS
+function openModifyModal() { document.getElementById('modify-modal').classList.add('open'); }
+function openExplainModal() { document.getElementById('explain-modal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// RECOMMENDATION ACTIONS
+function acceptRec() {
+  const card = document.getElementById('rec-card');
+  card.style.borderColor = 'var(--green)';
+  card.querySelector('.rec-header .rec-title').textContent = '✓ Accepted — Temperature correction applied';
+  card.querySelector('.rec-actions').innerHTML = '<span style="font-size:11px;color:var(--green)">Decision logged · Model will learn from this batch outcome</span>';
+  showToast('Correction accepted & applied. Decision logged.');
+  // Update score
+  setTimeout(() => {
+    document.getElementById('comp-score').textContent = '91.1';
+    document.getElementById('comp-delta').textContent = '▲ +0.7 after correction';
+  }, 1200);
+}
+
+function rejectRec() {
+  const card = document.getElementById('rec-card');
+  card.style.borderColor = 'var(--red)';
+  card.querySelector('.rec-header .rec-title').textContent = '✗ Rejected — Keeping current settings';
+  card.querySelector('.rec-actions').innerHTML = '<span style="font-size:11px;color:var(--red)">Rejection logged · System monitoring for further drift</span>';
+  showToast('Recommendation rejected. Outcome will be tracked.');
+}
+
+function applyModify() {
+  const v = document.getElementById('mod-temp').value;
+  closeModal('modify-modal');
+  showToast('Modified value ' + v + '°C applied. Decision logged.');
+}
+
+// OBJECTIVES
+function updateObj(id, val) {
+  document.getElementById(id).textContent = val + '%';
+}
+
+function saveObjectives() {
+  showToast('Priority profile saved. NSGA-II recalculating optimal solutions...');
+}
+
+function loadPreset(type) {
+  if (type === 'sustainability') {
+    document.querySelectorAll('.obj-slider')[0].value = 30;
+    document.querySelectorAll('.obj-slider')[1].value = 40;
+    document.querySelectorAll('.obj-slider')[2].value = 70;
+    document.querySelectorAll('.obj-slider')[3].value = 10;
+    document.getElementById('yield-pct').textContent = '30%';
+    document.getElementById('energy-pct').textContent = '40%';
+    document.getElementById('emission-pct').textContent = '70%';
+    document.getElementById('speed-pct').textContent = '10%';
+    showToast('Sustainability preset loaded. GS-2024-019 now active benchmark.');
+  } else {
+    document.querySelectorAll('.obj-slider')[0].value = 40;
+    document.querySelectorAll('.obj-slider')[1].value = 20;
+    document.querySelectorAll('.obj-slider')[2].value = 10;
+    document.querySelectorAll('.obj-slider')[3].value = 70;
+    document.getElementById('yield-pct').textContent = '40%';
+    document.getElementById('energy-pct').textContent = '20%';
+    document.getElementById('emission-pct').textContent = '10%';
+    document.getElementById('speed-pct').textContent = '70%';
+    showToast('Speed preset loaded. Throughput maximization active.');
+  }
+}
+
+// BATCH SIM
+function advanceBatch(action) {
+  const timeline = document.getElementById('batch-timeline');
+  const items = timeline.querySelectorAll('.timeline-item');
+  items.forEach(i => i.classList.remove('active'));
+
+  const labels = { accept: '✓ ACCEPT', reject: '✗ REJECT', modify: '✎ MODIFY' };
+  const colors = { accept: 'var(--green)', reject: 'var(--red)', modify: 'var(--blue)' };
+
+  const newItem = document.createElement('div');
+  newItem.className = 'timeline-item active';
+  newItem.innerHTML = `
+    <div class="timeline-time">08:51</div>
+    <div class="timeline-text">Operator <strong style="color:${colors[action]}">${labels[action]}</strong> feed rate correction. 
+    ${action === 'accept' ? 'Feed rate set to 122 kg/hr. Score projection improved to <strong>92.1</strong>.' : 
+      action === 'reject' ? 'Feed rate held at 114 kg/hr. System monitoring continues.' :
+      'Operator set custom feed rate. Decision logged for retraining.'}</div>
+  `;
+
+  const pending = Array.from(items).find(i => i.style.opacity === '0.4');
+  pending.style.opacity = '1';
+  pending.classList.add('done');
+  timeline.insertBefore(newItem, pending);
+
+  showToast('Decision recorded. ' + (action === 'accept' ? 'Feed rate correction applied.' : 'Outcome will be tracked.'));
+}
+
+// LIVE CHART
+function initChart() {
+  const canvas = document.getElementById('liveChart');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.parentElement.clientWidth - 40;
+  canvas.height = 170;
+
+  const W = canvas.width, H = canvas.height;
+  const pts = 40;
+  let data = { temp: [], score: [], gs: [] };
+
+  for (let i = 0; i < pts; i++) {
+    data.temp.push(340 + Math.sin(i * 0.3) * 4 + (i > 28 ? 5 : 0) + Math.random() * 1.5);
+    data.score.push(89 + Math.sin(i * 0.2) * 1.5 + i * 0.04 + Math.random() * 0.5);
+    data.gs.push(91.3);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid
+    ctx.strokeStyle = '#2A2A24';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = (H / 4) * i;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    function drawLine(arr, min, max, color, dash = []) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash(dash);
+      ctx.beginPath();
+      arr.forEach((v, i) => {
+        const x = (i / (pts - 1)) * W;
+        const y = H - ((v - min) / (max - min)) * H * 0.85 - H * 0.08;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // GS line
+    drawLine(data.gs, 85, 100, '#6B5520', [6, 4]);
+    // Score
+    drawLine(data.score, 85, 100, '#C9A84C', []);
+    // Temp (scaled to same range for visual)
+    const tempNorm = data.temp.map(t => 85 + (t - 330) / 40 * 15);
+    drawLine(tempNorm, 85, 100, '#CF5B4A', []);
+
+    // Labels
+    ctx.fillStyle = '#7A7567';
+    ctx.font = '10px DM Mono';
+    ctx.fillText('— Composite Score', 10, H - 8);
+    ctx.fillStyle = '#CF5B4A';
+    ctx.fillText('— Temperature', 170, H - 8);
+    ctx.fillStyle = '#6B5520';
+    ctx.fillText('--- GS Benchmark', 300, H - 8);
+  }
+
+  draw();
+
+  // Live update
+  setInterval(() => {
+    data.temp.push(340 + Math.sin(Date.now() * 0.001) * 4 + Math.random() * 2);
+    data.score.push(Math.min(92, (data.score[data.score.length-1] || 90) + (Math.random() - 0.48) * 0.3));
+    data.gs.push(91.3);
+    if (data.temp.length > pts) { data.temp.shift(); data.score.shift(); data.gs.shift(); }
+    draw();
+  }, 1200);
+}
+
+// INIT
+window.addEventListener('load', () => {
+  initChart();
+  // Animate score count-up
+  let start = 88;
+  const interval = setInterval(() => {
+    start += 0.3;
+    if (start >= 90.4) { clearInterval(interval); start = 90.4; }
+  }, 40);
+});
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', (e) => { if (e.target === o) o.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
