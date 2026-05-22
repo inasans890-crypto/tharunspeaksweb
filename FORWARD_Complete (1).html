@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FORWARD — AI Placement Readiness System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#020408;color:#fff;font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+canvas#particles{position:fixed;top:0;left:0;z-index:0;pointer-events:none;}
+.app{display:flex;min-height:100vh;position:relative;z-index:1;}
+.main-content{flex:1;margin-left:215px;padding:38px 46px;position:relative;z-index:1;}
+.page{display:none;animation:fadeIn 0.3s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.sidebar{width:215px;min-height:100vh;background:rgba(2,4,8,0.92);backdrop-filter:blur(24px);border-right:1px solid rgba(255,255,255,0.06);padding:28px 14px;display:flex;flex-direction:column;gap:3px;position:fixed;left:0;top:0;z-index:100;overflow-y:auto;}
+.sidebar-logo{padding:0 6px 24px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:12px;}
+.sidebar-logo-text{font-family:'Orbitron',monospace;font-weight:900;font-size:21px;background:linear-gradient(135deg,#00d2ff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px;}
+.sidebar-logo-sub{font-size:8px;color:rgba(255,255,255,0.25);letter-spacing:2.5px;margin-top:4px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:12px;border:none;cursor:pointer;text-align:left;background:transparent;border-left:2px solid transparent;color:rgba(255,255,255,0.35);font-family:'Syne',sans-serif;font-weight:400;font-size:13px;transition:all 0.22s;width:100%;}
+.nav-item.active{background:linear-gradient(135deg,rgba(0,210,255,0.12),rgba(168,85,247,0.12));border-left-color:#00d2ff;color:#fff;font-weight:700;}
+.nav-item:hover:not(.active){color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.04);}
+.nav-item.nav-danger{color:rgba(255,90,110,0.6);}
+.nav-item.nav-danger:hover{color:rgba(255,90,110,0.9);background:rgba(255,71,87,0.06);}
+.nav-sep{height:1px;background:rgba(255,255,255,0.06);margin:6px 0;}
+.sidebar-footer{margin-top:auto;padding:14px 10px;border-top:1px solid rgba(255,255,255,0.06);}
+.sf-name{font-weight:700;color:rgba(255,255,255,0.5);font-size:11px;margin-bottom:3px;}
+.sf-sub{font-size:10px;color:rgba(255,255,255,0.25);}
+.sf-badge{margin-top:8px;padding:5px 9px;background:rgba(0,210,255,0.09);border-radius:8px;color:#00d2ff;font-size:10px;letter-spacing:1px;display:inline-block;border:1px solid rgba(0,210,255,0.15);}
+.card{background:rgba(255,255,255,0.038);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,0.32);transition:all 0.3s ease;}
+.card.glow{border-color:rgba(0,210,255,0.2);box-shadow:0 0 32px rgba(0,210,255,0.1),0 8px 32px rgba(0,0,0,0.4);}
+.card.hover:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.4);}
+.btn-primary{background:linear-gradient(135deg,#00d2ff,#a855f7);border:none;border-radius:11px;padding:12px 24px;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.25s;letter-spacing:0.5px;}
+.btn-primary:hover{box-shadow:0 0 26px rgba(0,210,255,0.45);transform:translateY(-2px);}
+.btn-secondary{background:linear-gradient(135deg,#f472b6,#fb923c);border:none;border-radius:11px;padding:12px 24px;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.25s;}
+.btn-secondary:hover{box-shadow:0 0 26px rgba(244,114,182,0.4);transform:translateY(-2px);}
+.btn-ghost{padding:10px 18px;background:transparent;border:1px solid rgba(0,210,255,0.3);border-radius:11px;color:#00d2ff;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all 0.2s;}
+.btn-ghost:hover{background:rgba(0,210,255,0.07);border-color:rgba(0,210,255,0.5);}
+.btn-danger{width:100%;padding:12px;background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.2);border-radius:12px;color:#ff6b81;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;}
+.btn-danger:hover{background:rgba(255,71,87,0.14);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;}
+.g17{display:grid;grid-template-columns:1.7fr 1fr;gap:18px;margin-bottom:18px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.section-label{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:16px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.card-title{font-size:13px;color:rgba(255,255,255,0.62);font-weight:700;margin-bottom:18px;}
+.page-heading{font-family:'Orbitron',monospace;font-weight:700;font-size:26px;color:#fff;letter-spacing:1px;margin-bottom:6px;}
+.page-subheading{font-size:13px;color:rgba(255,255,255,0.38);margin-bottom:30px;}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+.login-box{width:100%;max-width:480px;padding:0 20px;}
+.brand-title{font-family:'Orbitron',monospace;font-weight:900;font-size:38px;background:linear-gradient(135deg,#00d2ff,#a855f7,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:5px;text-align:center;}
+.brand-subtitle{color:rgba(255,255,255,0.38);font-size:11px;letter-spacing:3px;text-align:center;margin-top:9px;margin-bottom:30px;}
+.role-toggle{display:flex;background:rgba(255,255,255,0.05);border-radius:12px;padding:4px;margin-bottom:20px;}
+.role-btn{flex:1;padding:10px;border-radius:10px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;transition:all 0.25s;background:transparent;color:rgba(255,255,255,0.38);}
+.role-btn.active{background:linear-gradient(135deg,#00d2ff,#a855f7);color:#fff;}
+.auth-tabs{display:flex;gap:16px;margin-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:14px;}
+.auth-tab{background:none;border:none;cursor:pointer;padding:6px 0;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:rgba(255,255,255,0.32);border-bottom:2px solid transparent;transition:all 0.2s;}
+.auth-tab.active{color:#00d2ff;border-bottom-color:#00d2ff;}
+.form-field{margin-bottom:16px;}
+.form-label{display:block;font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:7px;text-transform:uppercase;}
+.form-input{width:100%;padding:12px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:12px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;outline:none;transition:all 0.2s;}
+.form-input:focus{border-color:#00d2ff;box-shadow:0 0 18px rgba(0,210,255,0.18);}
+.form-input::placeholder{color:rgba(255,255,255,0.25);}
+/* Career path buttons on login */
+.career-path-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.cp-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:11px;border:1px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.55);font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s;text-align:left;}
+.cp-btn:hover{border-color:rgba(0,210,255,0.3);background:rgba(0,210,255,0.05);color:#fff;}
+.cp-btn.active{border-color:#00d2ff;background:rgba(0,210,255,0.12);color:#00d2ff;font-weight:700;}
+.cp-icon{font-size:16px;flex-shrink:0;}
+/* Progress */
+.prog-track{height:4px;background:rgba(255,255,255,0.06);border-radius:4px;}
+.prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#00d2ff,#2ed573);transition:width 0.5s ease;}
+.prog-track.thick{height:10px;border-radius:6px;}
+/* Tasks */
+.task-item{display:flex;align-items:center;gap:11px;padding:11px 15px;border-radius:11px;cursor:pointer;border:1px solid rgba(255,255,255,0.055);background:rgba(255,255,255,0.03);transition:all 0.2s;}
+.task-item.done{background:rgba(46,213,115,0.04);border-color:rgba(46,213,115,0.14);}
+.task-item:hover{background:rgba(255,255,255,0.05);}
+.checkbox{width:20px;height:20px;border-radius:6px;border:2px solid rgba(255,255,255,0.18);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;}
+.checkbox.checked{background:#2ed573;border-color:#2ed573;box-shadow:0 0 10px rgba(46,213,115,0.35);}
+.priority-badge{font-size:9px;padding:2px 7px;border-radius:6px;flex-shrink:0;font-weight:700;letter-spacing:0.5px;}
+/* Gap table */
+.gap-header{display:grid;grid-template-columns:2.2fr 1fr 1.3fr 0.8fr;padding:10px 20px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.055);}
+.gap-row{display:grid;grid-template-columns:2.2fr 1fr 1.3fr 0.8fr;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,0.04);align-items:center;}
+.gap-badge{padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;display:inline-block;}
+.gap-badge.cyan{background:rgba(0,210,255,0.12);color:#00d2ff;}
+/* Chips */
+.chip{padding:5px 13px;border-radius:20px;font-size:12px;display:inline-block;margin:3px;}
+.chip.purple{background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.25);}
+.chip.green{background:rgba(46,213,115,0.1);color:#2ed573;border:1px solid rgba(46,213,115,0.25);}
+.chip.neutral{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.58);border:1px solid rgba(255,255,255,0.09);}
+.chip.orange{background:rgba(251,146,60,0.1);color:#fb923c;border:1px solid rgba(251,146,60,0.22);}
+.chip.pink{background:rgba(244,114,182,0.1);color:#f472b6;border:1px solid rgba(244,114,182,0.22);}
+/* Accordion */
+.accordion-hd{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;transition:all 0.2s;user-select:none;}
+.accordion-hd.open{border-radius:12px 12px 0 0;}
+.accordion-bd{background:rgba(255,255,255,0.02);border:1px solid rgba(0,210,255,0.18);border-top:none;border-radius:0 0 12px 12px;overflow:hidden;}
+/* SW box */
+.sw-box{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;}
+.sw-box-hd{padding:12px 16px;background:rgba(255,255,255,0.04);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06);}
+.sw-box-bd{padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
+.sw-item{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.75);}
+/* Processing animation */
+@keyframes scanAnim{0%{width:0%;margin-left:0}50%{width:65%}100%{width:0%;margin-left:100%}}
+.scan-bar{height:3px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-top:10px;}
+.scan-fill{height:100%;background:linear-gradient(90deg,#00d2ff,#a855f7);animation:scanAnim 2s ease-in-out infinite;border-radius:3px;}
+/* Toggle */
+.toggle{width:44px;height:24px;border-radius:12px;cursor:pointer;transition:all 0.3s;position:relative;flex-shrink:0;}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;transition:left 0.3s;}
+/* Divider */
+.divider-row{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:700;color:rgba(255,255,255,0.62);margin-bottom:16px;}
+.divider-line{height:1px;background:rgba(255,255,255,0.1);}
+/* API badge */
+.api-status{position:fixed;top:16px;right:20px;z-index:200;padding:7px 14px;border-radius:20px;font-size:11px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:1px;display:flex;align-items:center;gap:6px;backdrop-filter:blur(12px);}
+.api-status.online{background:rgba(46,213,115,0.12);border:1px solid rgba(46,213,115,0.25);color:#2ed573;}
+.api-status.offline{background:rgba(255,165,2,0.12);border:1px solid rgba(255,165,2,0.25);color:#ffa502;}
+.api-dot{width:6px;height:6px;border-radius:50%;}
+.api-dot.online{background:#2ed573;box-shadow:0 0 6px rgba(46,213,115,0.7);}
+.api-dot.offline{background:#ffa502;box-shadow:0 0 6px rgba(255,165,2,0.7);}
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;padding:13px 20px;border-radius:13px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;display:none;border:1px solid;backdrop-filter:blur(16px);}
+.toast.success{background:rgba(46,213,115,0.15);border-color:rgba(46,213,115,0.35);color:#2ed573;}
+.toast.error{background:rgba(255,71,87,0.15);border-color:rgba(255,71,87,0.35);color:#ff6b81;}
+.toast.info{background:rgba(0,210,255,0.15);border-color:rgba(0,210,255,0.35);color:#00d2ff;}
+/* Admin */
+.admin-table{width:100%;border-collapse:collapse;}
+.admin-table th{padding:10px 12px;font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1.5px;text-transform:uppercase;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);font-weight:400;}
+.admin-table td{padding:11px 12px;font-size:12px;color:rgba(255,255,255,0.65);border-bottom:1px solid rgba(255,255,255,0.04);}
+.admin-table tr:hover td{background:rgba(255,255,255,0.02);}
+.a-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;}
+.a-badge.green{background:rgba(46,213,115,0.12);color:#2ed573;}
+.a-badge.blue{background:rgba(0,210,255,0.12);color:#00d2ff;}
+.a-badge.red{background:rgba(255,71,87,0.12);color:#ff6b81;}
+.a-badge.yellow{background:rgba(255,165,2,0.12);color:#ffa502;}
+.a-stat{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:18px;text-align:center;}
+.a-stat-v{font-family:'Orbitron',monospace;font-weight:900;font-size:26px;margin-bottom:4px;}
+.a-stat-l{font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;text-transform:uppercase;}
+.fb-card{border:1px solid rgba(255,255,255,0.07);border-radius:13px;padding:14px;margin-bottom:10px;}
+/* Career filter tabs */
+.career-filter-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.cf-tab{padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.5);font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s;}
+.cf-tab.active{border-color:rgba(0,210,255,0.4);background:rgba(0,210,255,0.12);color:#00d2ff;font-weight:700;}
+/* Star rating */
+.star{font-size:24px;cursor:pointer;color:rgba(255,255,255,0.2);transition:color 0.15s;user-select:none;background:none;border:none;padding:0;}
+.star.lit{color:#ffc107;}
+/* Activity log */
+.act-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;margin-bottom:7px;background:rgba(255,255,255,0.03);}
+.act-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+/* Report cards */
+.rep-card{text-align:center;padding:26px;cursor:pointer;transition:all 0.2s;}
+.rep-card:hover{background:rgba(255,255,255,0.04);transform:translateY(-2px);}
+select.form-input{cursor:pointer;}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div class="api-status offline" id="apiStatus"><div class="api-dot offline" id="apiDot"></div><span id="apiStatusText">Backend Offline</span></div>
+<div class="toast" id="toast"></div>
+
+<!-- ════════ LOGIN ════════ -->
+<div id="loginPage" class="login-wrap">
+  <div class="login-box">
+    <div class="brand-title">FORWARD</div>
+    <div class="brand-subtitle">AI-DRIVEN CAREER READINESS SYSTEM</div>
+    <div class="card glow" style="padding:28px;">
+      <div class="role-toggle">
+        <button class="role-btn active" id="roleStudentBtn" onclick="setRole('student')">Student</button>
+        <button class="role-btn" id="roleAdminBtn" onclick="setRole('admin')">Admin</button>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="setAuthMode('login',this)">Login</button>
+        <button class="auth-tab" onclick="setAuthMode('signup',this)">Sign Up</button>
+      </div>
+      <div id="signupExtra" style="display:none;">
+        <div class="form-field"><label class="form-label">Full Name</label><input class="form-input" id="loginName" placeholder="Your full name"/></div>
+      </div>
+      <div class="form-field"><label class="form-label">Email Address</label><input class="form-input" id="loginEmail" type="email" placeholder="you@university.edu"/></div>
+      <div class="form-field"><label class="form-label">Password</label><input class="form-input" id="loginPass" type="password" placeholder="••••••••"/></div>
+      <div id="cgpaExtra" style="display:none;" class="form-field"><label class="form-label">CGPA</label><input class="form-input" id="loginCgpa" type="number" step="0.1" min="0" max="10" placeholder="8.5"/></div>
+
+      <!-- Career path selector (shown on signup) -->
+      <div id="careerPathSection" style="display:none;">
+        <div class="form-field" style="margin-bottom:8px;"><label class="form-label">Your Career Path (choose one)</label></div>
+        <div class="career-path-grid">
+          <button class="cp-btn active" onclick="selectCP('tech',this)"><span class="cp-icon">💻</span>Technical / IT</button>
+          <button class="cp-btn" onclick="selectCP('business',this)"><span class="cp-icon">🧑‍💼</span>Business &amp; Management</button>
+          <button class="cp-btn" onclick="selectCP('entrepreneur',this)"><span class="cp-icon">🚀</span>Entrepreneurship</button>
+          <button class="cp-btn" onclick="selectCP('teaching',this)"><span class="cp-icon">👩‍🏫</span>Teaching / Faculty</button>
+          <button class="cp-btn" onclick="selectCP('creative',this)"><span class="cp-icon">🎭</span>Acting &amp; Creative</button>
+          <button class="cp-btn" onclick="selectCP('other',this)"><span class="cp-icon">📊</span>Other Professions</button>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="loginSubmitBtn" style="width:100%;padding:14px;margin-top:10px;font-size:14px;" onclick="doLogin()">Launch Dashboard</button>
+      <p style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,0.2);">Demo — any credentials work · All career paths supported</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ APP ════════ -->
+<div id="appShell" class="app" style="display:none;">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">FWD</div><div class="sidebar-logo-sub">Career AI</div></div>
+
+    <!-- Student nav -->
+    <button class="nav-item active stu-nav" data-page="dashboard" onclick="navigate('dashboard',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard
+    </button>
+    <button class="nav-item stu-nav" data-page="resume" onclick="navigate('resume',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Resume
+    </button>
+    <button class="nav-item stu-nav" data-page="skills" onclick="navigate('skills',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Skill Analysis
+    </button>
+    <button class="nav-item stu-nav" data-page="predict" onclick="navigate('predict',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Predict Score
+    </button>
+    <button class="nav-item stu-nav" data-page="roles" onclick="navigate('roles',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Career Match
+    </button>
+    <button class="nav-item stu-nav" data-page="actionplan" onclick="navigate('actionplan',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Action Plan
+    </button>
+    <button class="nav-item stu-nav" data-page="feedback" onclick="navigate('feedback',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Feedback
+    </button>
+
+    <!-- Admin nav (hidden initially) -->
+    <div class="nav-sep adm-nav" style="display:none;"></div>
+    <button class="nav-item adm-nav" data-page="admin" onclick="navigate('admin',this)" style="display:none;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Admin Dashboard
+    </button>
+    <button class="nav-item adm-nav" data-page="students" onclick="navigate('students',this)" style="display:none;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Students
+    </button>
+    <button class="nav-item adm-nav" data-page="fbadmin" onclick="navigate('fbadmin',this)" style="display:none;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Feedback Review
+    </button>
+    <button class="nav-item adm-nav" data-page="reports" onclick="navigate('reports',this)" style="display:none;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Reports
+    </button>
+
+    <div class="nav-sep"></div>
+    <button class="nav-item" data-page="settings" onclick="navigate('settings',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings
+    </button>
+    <button class="nav-item nav-danger" onclick="doLogout()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
+    </button>
+    <div class="sidebar-footer">
+      <div class="sf-name" id="sfName">Daniel</div>
+      <div class="sf-sub" id="sfSub">Computer Science Eng.</div>
+      <div class="sf-badge" id="sfBadge">CGPA: 8.4</div>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-heading" id="dashWelcome">Welcome back, Daniel</div>
+      <div class="page-subheading">Here's your placement readiness overview — <span id="dashTrackLabel" style="color:#00d2ff;font-weight:700;">Technical / IT Track</span></div>
+      <div class="g17">
+        <div class="card glow">
+          <div class="card-title">Placement Readiness Score</div>
+          <div style="display:flex;align-items:center;gap:26px;">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px;"><span style="font-size:22px;font-family:'Orbitron',monospace;font-weight:900;color:#2ed573;">+5%</span><span style="font-size:12px;color:rgba(255,255,255,0.38);">since last analysis</span></div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.28);margin-bottom:20px;display:flex;align-items:center;gap:6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Last analyzed 1 day ago</div>
+              <svg width="100%" height="58" viewBox="0 0 280 58" preserveAspectRatio="none"><defs><linearGradient id="trendGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00d2ff"/><stop offset="100%" stop-color="#a855f7"/></linearGradient></defs><polyline fill="none" stroke="url(#trendGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="0,54 40,45 80,35 120,25 160,16 200,9 240,4 280,2"/></svg>
+            </div>
+            <div style="flex-shrink:0;">
+              <svg width="152" height="152"><defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00d2ff"/><stop offset="100%" stop-color="#a855f7"/></linearGradient><filter id="ringGlow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="76" cy="76" r="58" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/><circle cx="76" cy="76" r="58" fill="none" stroke="url(#ringGrad)" stroke-width="9" stroke-dasharray="364" stroke-dashoffset="80" stroke-linecap="round" transform="rotate(-90 76 76)" filter="url(#ringGlow)" id="dashRingCircle" style="transition:stroke-dashoffset 1.6s ease;"/><text x="76" y="84" text-anchor="middle" fill="#fff" font-size="24" font-weight="700" font-family="'Orbitron',monospace" id="dashScoreText">78%</text></svg>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Skill Highlights</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Strongest</div>
+          <div style="padding:13px 18px;border-radius:11px;background:rgba(0,210,255,0.07);border:1px solid rgba(0,210,255,0.26);color:#00d2ff;font-weight:700;font-size:15px;text-align:center;margin-bottom:14px;">Teamwork</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Needs Improvement</div>
+          <div style="padding:13px 18px;border-radius:11px;background:rgba(255,71,87,0.07);border:1px solid rgba(255,71,87,0.26);display:flex;align-items:center;justify-content:center;gap:9px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff4757" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg><span style="color:#ff6b81;font-weight:700;font-size:15px;">Algorithms</span></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.22);text-align:center;margin-top:10px;">Needs the most improvement</div>
+        </div>
+      </div>
+      <div class="g17">
+        <div class="card">
+          <div class="card-title">Next Steps</div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:22px;" id="dashNextSteps">
+            <div style="display:flex;align-items:flex-start;gap:10px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#00d2ff" stroke-width="2.5" style="margin-top:2px;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size:13px;color:rgba(255,255,255,0.7);">Practice data structures and algorithm questions</span></div>
+            <div style="display:flex;align-items:flex-start;gap:10px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#00d2ff" stroke-width="2.5" style="margin-top:2px;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size:13px;color:rgba(255,255,255,0.7);">Quantify achievements in past experiences</span></div>
+            <div style="display:flex;align-items:flex-start;gap:10px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#00d2ff" stroke-width="2.5" style="margin-top:2px;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size:13px;color:rgba(255,255,255,0.7);">Complete mock interview practice sessions</span></div>
+          </div>
+          <button class="btn-ghost" onclick="navigate('actionplan',null)">View Full Action Plan<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="card">
+          <div class="card-title">Resume Status</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"><div style="width:8px;height:8px;border-radius:50%;background:#2ed573;box-shadow:0 0 8px rgba(46,213,115,0.65);"></div><span style="font-size:14px;color:#2ed573;font-weight:700;">Updated</span></div>
+          <div style="padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="font-size:13px;color:#fff;font-weight:700;">resume.pdf</span></div><div style="font-size:11px;color:rgba(255,255,255,0.28);">Uploaded 1 day ago</div></div>
+          <button class="btn-primary" style="width:100%;padding:10px;font-size:12px;" onclick="navigate('resume',null)">Update Resume</button>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:9px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span style="font-size:13px;color:rgba(255,255,255,0.62);font-weight:700;">Quick Action Plan</span></div>
+          <div style="display:flex;align-items:center;gap:14px;"><span style="font-size:12px;color:rgba(255,255,255,0.3);" id="dashTaskCount">3 / 7 completed</span><button class="btn-secondary" style="padding:7px 14px;font-size:12px;" onclick="navigate('actionplan',null)">Full Plan</button></div>
+        </div>
+        <div class="prog-track" style="margin-bottom:18px;"><div class="prog-fill" id="dashProgFill" style="width:43%;"></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;" id="dashTaskGrid"></div>
+      </div>
+    </div>
+
+    <!-- ══ RESUME ══ -->
+    <div id="page-resume" class="page">
+      <div class="page-heading">Resume Analyzer</div>
+      <div class="page-subheading">Upload your resume — AI extracts skills and predicts your placement readiness score.</div>
+      <div class="g2">
+        <div class="card">
+          <div class="section-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Upload Resume</div>
+          <div id="dropZone" style="border:2px dashed rgba(255,255,255,0.1);border-radius:16px;padding:52px 24px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.02);transition:all 0.3s;" onclick="document.getElementById('resumeFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='#00d2ff';this.style.background='rgba(0,210,255,0.04)';" ondragleave="this.style.borderColor='rgba(255,255,255,0.1)';this.style.background='rgba(255,255,255,0.02)';" ondrop="handleResumeDrop(event)">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" style="display:block;margin:0 auto 14px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <div style="font-size:15px;font-weight:700;margin-bottom:8px;">Drop your resume here</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.3);">Supports PDF and DOCX · Max 10 MB</div>
+            <div id="resumeFileName" style="margin-top:16px;font-size:13px;color:#2ed573;display:none;font-weight:700;"></div>
+          </div>
+          <input type="file" id="resumeFileInput" accept=".pdf,.docx" style="display:none;" onchange="handleResumeFile(this)"/>
+          <div id="resumeProcessing" style="display:none;margin-top:18px;padding:16px;background:rgba(0,210,255,0.05);border-radius:12px;text-align:center;border:1px solid rgba(0,210,255,0.12);"><div style="font-size:11px;color:#00d2ff;letter-spacing:2px;font-weight:700;">ANALYZING RESUME...</div><div class="scan-bar"><div class="scan-fill"></div></div></div>
+        </div>
+        <div class="card">
+          <div class="section-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Extraction Results</div>
+          <div id="resumeResults" style="padding:52px 0;text-align:center;color:rgba(255,255,255,0.2);font-size:13px;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" style="display:block;margin:0 auto 12px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Upload a resume to see AI analysis</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SKILLS ══ -->
+    <div id="page-skills" class="page">
+      <div style="text-align:center;margin-bottom:32px;"><div style="font-family:'Orbitron',monospace;font-weight:700;font-size:28px;color:#fff;letter-spacing:1px;margin-bottom:8px;">Skill Gap Analysis</div><div style="font-size:13px;color:rgba(255,255,255,0.38);">Detailed breakdown of your skills versus industry standards.</div></div>
+      <div class="g4" id="skillCatCards"></div>
+      <div class="g2">
+        <div class="card"><div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.8);margin-bottom:14px;">Strengths</div><div class="sw-box"><div class="sw-box-hd"><span style="font-weight:700;font-size:13px;">Technical Skills</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></div><div class="sw-box-bd" id="strengthsList"></div></div></div>
+        <div class="card"><div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.8);margin-bottom:14px;">Weaknesses</div><div class="sw-box"><div class="sw-box-hd"><span style="font-weight:700;font-size:13px;">Areas to Improve</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></div><div class="sw-box-bd" id="weaknessesList"></div></div></div>
+      </div>
+      <div class="divider-row"><div class="divider-line" style="width:20px;"></div>Complete Skill Gap Analysis<div class="divider-line" style="flex:1;"></div></div>
+      <div id="skillAccordion"></div>
+    </div>
+
+    <!-- ══ PREDICT ══ -->
+    <div id="page-predict" class="page">
+      <div class="page-heading">Predict Readiness Score</div>
+      <div class="page-subheading">Enter your academic and experience details — the AI model predicts your placement readiness.</div>
+      <div class="g2">
+        <div class="card">
+          <div class="section-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile Input</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div class="form-field" style="margin:0;"><label class="form-label">CGPA</label><input class="form-input" id="pCgpa" type="number" step="0.1" min="0" max="10" value="8.4"/></div>
+            <div class="form-field" style="margin:0;"><label class="form-label">Projects</label><input class="form-input" id="pProjects" type="number" min="0" value="3"/></div>
+            <div class="form-field" style="margin:0;"><label class="form-label">Internships</label><input class="form-input" id="pInternships" type="number" min="0" value="1"/></div>
+          </div>
+          <div class="form-field"><label class="form-label">Certifications</label><input class="form-input" id="pCerts" type="number" min="0" value="2"/></div>
+          <div class="form-field"><label class="form-label">Technical Skills (comma separated)</label><textarea class="form-input" id="pSkills" rows="3" placeholder="Python, React, SQL, Machine Learning, Docker" style="resize:none;">Python, React, SQL, Machine Learning, Git</textarea></div>
+          <div class="form-field" style="margin-bottom:0;">
+            <label class="form-label">DSA Proficiency Level</label>
+            <div style="display:flex;gap:8px;margin-top:2px;">
+              <button onclick="setDSA('easy',this)" class="dsa-btn" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.38);font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s;">Easy</button>
+              <button onclick="setDSA('medium',this)" class="dsa-btn" style="flex:1;padding:10px;border-radius:10px;border:1px solid #00d2ff;background:rgba(0,210,255,0.12);color:#00d2ff;font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s;font-weight:700;">Medium</button>
+              <button onclick="setDSA('hard',this)" class="dsa-btn" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.38);font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s;">Hard</button>
+            </div>
+          </div>
+          <button class="btn-primary" style="width:100%;padding:13px;margin-top:20px;" onclick="runPrediction()" id="predictBtn">Predict My Score</button>
+        </div>
+        <div class="card glow">
+          <div class="section-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>AI Prediction Result</div>
+          <div id="predictResults" style="padding:52px 0;text-align:center;color:rgba(255,255,255,0.2);font-size:13px;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" style="display:block;margin:0 auto 12px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Fill in your details and click Predict</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CAREER MATCH (roles) ══ -->
+    <div id="page-roles" class="page">
+      <div class="page-heading">Career Match</div>
+      <div class="page-subheading">AI-matched career paths — technical and non-technical roles based on your complete profile.</div>
+      <!-- Filter tabs -->
+      <div class="career-filter-wrap" id="careerFilterTabs">
+        <button class="cf-tab active" onclick="filterRoles('all',this)">All Paths</button>
+        <button class="cf-tab" onclick="filterRoles('tech',this)">💻 Technical</button>
+        <button class="cf-tab" onclick="filterRoles('business',this)">🧑‍💼 Business</button>
+        <button class="cf-tab" onclick="filterRoles('entrepreneur',this)">🚀 Entrepreneur</button>
+        <button class="cf-tab" onclick="filterRoles('teaching',this)">👩‍🏫 Teaching</button>
+        <button class="cf-tab" onclick="filterRoles('creative',this)">🎭 Creative</button>
+        <button class="cf-tab" onclick="filterRoles('other',this)">📊 Other</button>
+      </div>
+      <div class="g2" id="rolesGrid" style="margin-bottom:18px;"></div>
+      <div class="card">
+        <div class="section-label" id="companiesLabel"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Top Organisations</div>
+        <div style="display:flex;flex-wrap:wrap;gap:9px;" id="companiesList">
+          <span class="chip neutral">Google</span><span class="chip neutral">Microsoft</span><span class="chip neutral">Amazon</span><span class="chip neutral">Flipkart</span><span class="chip neutral">Razorpay</span><span class="chip neutral">Swiggy</span><span class="chip neutral">CRED</span><span class="chip neutral">Zepto</span><span class="chip neutral">Atlassian</span><span class="chip neutral">Salesforce</span><span class="chip neutral">Freshworks</span><span class="chip neutral">Meesho</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ACTION PLAN ══ -->
+    <div id="page-actionplan" class="page">
+      <div class="page-heading">Action Plan</div>
+      <div class="page-subheading">Your personalized AI-generated placement preparation roadmap.</div>
+      <div class="card glow" style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div><div style="font-size:30px;font-family:'Orbitron',monospace;font-weight:900;" id="apCount">3/7</div><div style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:1.2px;margin-top:2px;">TASKS COMPLETED</div></div>
+          <div style="flex:1;margin:0 32px;"><div class="prog-track thick"><div class="prog-fill" id="apProgFill" style="width:43%;"></div></div><div style="font-size:11px;color:rgba(255,255,255,0.28);margin-top:7px;" id="apPercent">43% Complete</div></div>
+          <button class="btn-secondary" style="padding:11px 20px;" onclick="completeAllTasks()">Mark All Done</button>
+        </div>
+      </div>
+      <div id="actionPlanContainer"></div>
+    </div>
+
+    <!-- ══ FEEDBACK (student) ══ -->
+    <div id="page-feedback" class="page">
+      <div class="page-heading">Submit Feedback</div>
+      <div class="page-subheading">Share your experience — help us improve FORWARD for every student.</div>
+      <div class="g2">
+        <div class="card">
+          <div class="section-label">New Feedback</div>
+          <div class="form-field"><label class="form-label">Category</label>
+            <select class="form-input" id="fbCat">
+              <option value="dashboard">Dashboard Experience</option>
+              <option value="resume">Resume Analysis</option>
+              <option value="prediction">Score Prediction</option>
+              <option value="roles">Career Recommendations</option>
+              <option value="general">General</option>
+            </select>
+          </div>
+          <div class="form-field"><label class="form-label">Rating</label>
+            <div style="display:flex;gap:3px;" id="starRow">
+              <button class="star" onclick="setStar(1)">★</button>
+              <button class="star" onclick="setStar(2)">★</button>
+              <button class="star" onclick="setStar(3)">★</button>
+              <button class="star" onclick="setStar(4)">★</button>
+              <button class="star" onclick="setStar(5)">★</button>
+            </div>
+          </div>
+          <div class="form-field"><label class="form-label">Subject</label><input class="form-input" id="fbSubject" placeholder="Brief subject line"/></div>
+          <div class="form-field"><label class="form-label">Message</label><textarea class="form-input" id="fbMessage" rows="5" style="resize:none;" placeholder="Describe your experience or suggestions..."></textarea></div>
+          <button class="btn-primary" style="width:100%;padding:13px;margin-top:4px;" onclick="submitFeedback()">Submit Feedback</button>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:16px;"><div class="section-label">Your Submissions</div><div id="myFbList"><div style="padding:20px 0;text-align:center;font-size:12px;color:rgba(255,255,255,0.2);">No feedback submitted yet</div></div></div>
+          <div class="card"><div class="section-label">Guidelines</div><div style="display:flex;flex-direction:column;gap:9px;font-size:12px;color:rgba(255,255,255,0.6);"><div>→ Be specific about what worked or didn't work</div><div>→ Include steps to reproduce any bugs</div><div>→ Suggestions for new features are always welcome</div><div>→ Admin will review and respond within 24 hours</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN DASHBOARD ══ -->
+    <div id="page-admin" class="page">
+      <div class="page-heading">Admin Dashboard</div>
+      <div class="page-subheading">Batch 2025 — Real-time Placement Cell Analytics</div>
+      <!-- KPIs row 1 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;">
+        <div class="a-stat"><div class="a-stat-v" style="color:#00d2ff;">320</div><div class="a-stat-l">Total Students</div></div>
+        <div class="a-stat"><div class="a-stat-v" style="color:#a855f7;">67.4%</div><div class="a-stat-l">Avg Readiness</div></div>
+        <div class="a-stat"><div class="a-stat-v" style="color:#2ed573;">198</div><div class="a-stat-l">Placed / Offered</div></div>
+        <div class="a-stat"><div class="a-stat-v" style="color:#ffa502;">122</div><div class="a-stat-l">Need Support</div></div>
+      </div>
+      <!-- KPIs row 2 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
+        <div class="a-stat"><div class="a-stat-v" style="color:#f472b6;" id="adminFbTotal">0</div><div class="a-stat-l">Feedbacks</div></div>
+        <div class="a-stat"><div class="a-stat-v" style="color:#00d2ff;" id="adminFbAvg">—</div><div class="a-stat-l">Avg Rating</div></div>
+        <div class="a-stat"><div class="a-stat-v" style="color:#2ed573;">89%</div><div class="a-stat-l">Resume Uploads</div></div>
+        <div class="a-stat"><div class="a-stat-v" style="color:#a855f7;">12</div><div class="a-stat-l">Avg Days to Place</div></div>
+      </div>
+      <div class="g2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="section-label">Readiness Distribution</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:6px;"><span>0–40 · Needs Work</span><span style="color:#ff4757;font-weight:700;">28</span></div><div style="height:10px;background:rgba(255,255,255,0.05);border-radius:5px;"><div style="height:100%;width:9%;background:#ff4757;border-radius:5px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:6px;"><span>41–60 · In Progress</span><span style="color:#ffa502;font-weight:700;">84</span></div><div style="height:10px;background:rgba(255,255,255,0.05);border-radius:5px;"><div style="height:100%;width:26%;background:#ffa502;border-radius:5px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:6px;"><span>61–80 · Ready</span><span style="color:#2ed573;font-weight:700;">142</span></div><div style="height:10px;background:rgba(255,255,255,0.05);border-radius:5px;"><div style="height:100%;width:44%;background:#2ed573;border-radius:5px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:6px;"><span>81–100 · Excellent</span><span style="color:#00d2ff;font-weight:700;">66</span></div><div style="height:10px;background:rgba(255,255,255,0.05);border-radius:5px;"><div style="height:100%;width:21%;background:#00d2ff;border-radius:5px;"></div></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-label">Batch Skill Gaps</div>
+          <div style="display:flex;flex-direction:column;gap:13px;">
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:5px;"><span>System Design</span><span style="color:#ff6b81;font-weight:700;">198 students</span></div><div style="height:5px;background:rgba(255,255,255,0.05);border-radius:3px;"><div style="height:100%;width:62%;background:linear-gradient(90deg,#ff4757,#f472b6);border-radius:3px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:5px;"><span>Cloud (AWS)</span><span style="color:#ff6b81;font-weight:700;">176 students</span></div><div style="height:5px;background:rgba(255,255,255,0.05);border-radius:3px;"><div style="height:100%;width:55%;background:linear-gradient(90deg,#ff4757,#f472b6);border-radius:3px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:5px;"><span>Docker / Kubernetes</span><span style="color:#ff6b81;font-weight:700;">154 students</span></div><div style="height:5px;background:rgba(255,255,255,0.05);border-radius:3px;"><div style="height:100%;width:48%;background:linear-gradient(90deg,#ff4757,#f472b6);border-radius:3px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:5px;"><span>Spring Boot</span><span style="color:#ff6b81;font-weight:700;">132 students</span></div><div style="height:5px;background:rgba(255,255,255,0.05);border-radius:3px;"><div style="height:100%;width:41%;background:linear-gradient(90deg,#ff4757,#f472b6);border-radius:3px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:5px;"><span>GraphQL</span><span style="color:#ff6b81;font-weight:700;">118 students</span></div><div style="height:5px;background:rgba(255,255,255,0.05);border-radius:3px;"><div style="height:100%;width:37%;background:linear-gradient(90deg,#ff4757,#f472b6);border-radius:3px;"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <!-- Dept table + Activity -->
+      <div class="g2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="section-label">Department Breakdown</div>
+          <table class="admin-table"><thead><tr><th>Dept</th><th>Students</th><th>Avg Score</th><th>Placed</th></tr></thead><tbody>
+            <tr><td style="color:#fff;font-weight:500;">CSE</td><td>130</td><td style="color:#00d2ff;font-weight:700;">71.2</td><td><span class="a-badge green">82%</span></td></tr>
+            <tr><td style="color:#fff;font-weight:500;">IT</td><td>85</td><td style="color:#00d2ff;font-weight:700;">68.5</td><td><span class="a-badge green">76%</span></td></tr>
+            <tr><td style="color:#fff;font-weight:500;">ECE</td><td>62</td><td style="color:#ffa502;font-weight:700;">61.3</td><td><span class="a-badge blue">58%</span></td></tr>
+            <tr><td style="color:#fff;font-weight:500;">MECH</td><td>43</td><td style="color:#ff6b81;font-weight:700;">54.8</td><td><span class="a-badge red">42%</span></td></tr>
+          </tbody></table>
+        </div>
+        <div class="card">
+          <div class="section-label">Recent Activity</div>
+          <div class="act-row"><div class="act-dot" style="background:#2ed573;"></div><div style="flex:1;"><div style="font-size:12px;color:rgba(255,255,255,0.7);">Ananya S. achieved Placement Ready</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">2 minutes ago</div></div></div>
+          <div class="act-row"><div class="act-dot" style="background:#00d2ff;"></div><div style="flex:1;"><div style="font-size:12px;color:rgba(255,255,255,0.7);">12 new resume uploads today</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">1 hour ago</div></div></div>
+          <div class="act-row"><div class="act-dot" style="background:#a855f7;"></div><div style="flex:1;"><div style="font-size:12px;color:rgba(255,255,255,0.7);">New batch analytics report generated</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">3 hours ago</div></div></div>
+          <div class="act-row"><div class="act-dot" style="background:#ffa502;"></div><div style="flex:1;"><div style="font-size:12px;color:rgba(255,255,255,0.7);" id="adminPendingAct">5 feedback submissions pending</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">5 hours ago</div></div></div>
+          <div class="act-row"><div class="act-dot" style="background:#f472b6;"></div><div style="flex:1;"><div style="font-size:12px;color:rgba(255,255,255,0.7);">Rahul M. score dropped — flagged</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">Yesterday</div></div></div>
+        </div>
+      </div>
+      <!-- Batch trend chart -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="section-label">Batch Average Score Trend</div>
+        <svg width="100%" height="130" viewBox="0 0 700 130" preserveAspectRatio="none">
+          <defs><linearGradient id="btg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f472b6"/><stop offset="100%" stop-color="#fb923c"/></linearGradient><linearGradient id="bta" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(244,114,182,0.15)"/><stop offset="100%" stop-color="rgba(244,114,182,0)"/></linearGradient></defs>
+          <polygon fill="url(#bta)" points="0,108 100,92 200,80 300,64 400,53 500,42 600,36 600,130 0,130"/>
+          <polyline fill="none" stroke="url(#btg)" stroke-width="2.5" stroke-linecap="round" points="0,108 100,92 200,80 300,64 400,53 500,42 600,36"/>
+          <circle cx="0" cy="108" r="4" fill="#f472b6"/><circle cx="100" cy="92" r="4" fill="#f472b6"/><circle cx="200" cy="80" r="4" fill="#fb923c"/><circle cx="300" cy="64" r="4" fill="#fb923c"/><circle cx="400" cy="53" r="4" fill="#fb923c"/><circle cx="500" cy="42" r="4" fill="#fb923c"/><circle cx="600" cy="36" r="4" fill="#fb923c"/>
+          <text x="4" y="122" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Syne,sans-serif">Aug(48)</text>
+          <text x="97" y="122" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Syne,sans-serif">Sep(53)</text>
+          <text x="197" y="122" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Syne,sans-serif">Oct(57)</text>
+          <text x="297" y="122" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Syne,sans-serif">Nov(61)</text>
+          <text x="397" y="122" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Syne,sans-serif">Dec(64)</text>
+          <text x="497" y="122" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Syne,sans-serif">Jan(67)</text>
+          <text x="597" y="122" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Syne,sans-serif">Feb(67.4)</text>
+        </svg>
+      </div>
+      <div class="g3">
+        <button class="btn-primary" style="padding:13px;" onclick="showToast('Batch report downloaded!','success')">Download Batch Report</button>
+        <button class="btn-secondary" style="padding:13px;" onclick="navigate('fbadmin',null)">Review Feedback <span id="fbPendingBadge"></span></button>
+        <button class="btn-ghost" style="padding:13px;justify-content:center;" onclick="navigate('students',null)">View All Students</button>
+      </div>
+    </div>
+
+    <!-- ══ STUDENTS (admin) ══ -->
+    <div id="page-students" class="page">
+      <div class="page-heading">Student Management</div>
+      <div class="page-subheading">Browse and manage all students in Batch 2025.</div>
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+          <input class="form-input" style="flex:1;min-width:200px;" placeholder="Search by name, email or department..." id="stuSearch" oninput="filterStudents()"/>
+          <select class="form-input" style="width:145px;" id="stuScoreF" onchange="filterStudents()"><option value="">All Scores</option><option value="high">High (75+)</option><option value="mid">Mid (50–74)</option><option value="low">Low (&lt;50)</option></select>
+          <select class="form-input" style="width:120px;" id="stuDeptF" onchange="filterStudents()"><option value="">All Depts</option><option value="CSE">CSE</option><option value="IT">IT</option><option value="ECE">ECE</option><option value="MECH">MECH</option></select>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-label" id="stuCountLabel">Showing students</div>
+        <table class="admin-table"><thead><tr><th>Name</th><th>Dept</th><th>CGPA</th><th>Score</th><th>Status</th><th>Career Path</th><th>Action</th></tr></thead><tbody id="stuBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ══ FEEDBACK REVIEW (admin) ══ -->
+    <div id="page-fbadmin" class="page">
+      <div class="page-heading">Feedback Review</div>
+      <div class="page-subheading">Review, respond to, and manage all student feedback submissions.</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
+        <div class="a-stat"><div class="a-stat-v" id="fbAdTotal">0</div><div class="a-stat-l">Total</div></div>
+        <div class="a-stat"><div class="a-stat-v" style="color:#ffa502;" id="fbAdPending">0</div><div class="a-stat-l">Pending</div></div>
+        <div class="a-stat"><div class="a-stat-v" style="color:#2ed573;" id="fbAdResolved">0</div><div class="a-stat-l">Resolved</div></div>
+        <div class="a-stat"><div class="a-stat-v" id="fbAdAvg">—</div><div class="a-stat-l">Avg Rating</div></div>
+      </div>
+      <div class="g2" style="margin-bottom:16px;">
+        <div class="card"><div class="section-label">Rating Distribution</div><div id="fbRatingBars"></div></div>
+        <div class="card"><div class="section-label">By Category</div><div id="fbCatBreakdown"></div></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="section-label" style="margin-bottom:0;">All Submissions</div>
+          <select class="form-input" style="width:150px;padding:8px 12px;font-size:12px;" id="fbStatusFilter" onchange="renderAdminFb()"><option value="">All Status</option><option value="pending">Pending</option><option value="resolved">Resolved</option></select>
+        </div>
+        <div id="fbAdminList"></div>
+      </div>
+    </div>
+
+    <!-- ══ REPORTS (admin) ══ -->
+    <div id="page-reports" class="page">
+      <div class="page-heading">Reports &amp; Exports</div>
+      <div class="page-subheading">Generate and download placement analytics reports.</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+        <div class="card rep-card" onclick="showToast('Batch Summary downloaded!','success')"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#00d2ff" stroke-width="1.5" style="display:block;margin:0 auto 12px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">Batch Summary</div><div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:12px;">Overall readiness and placement stats</div><span class="chip neutral" style="font-size:10px;">PDF · Excel</span></div>
+        <div class="card rep-card" onclick="showToast('Skill Gap Report downloaded!','success')"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.5" style="display:block;margin:0 auto 12px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">Skill Gap Report</div><div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:12px;">Top missing skills across batch</div><span class="chip purple" style="font-size:10px;">PDF · Excel</span></div>
+        <div class="card rep-card" onclick="showToast('Student Progress downloaded!','success')"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2ed573" stroke-width="1.5" style="display:block;margin:0 auto 12px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">Student Progress</div><div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:12px;">Individual score progression</div><span class="chip green" style="font-size:10px;">PDF · Excel</span></div>
+        <div class="card rep-card" onclick="showToast('Placement Status downloaded!','success')"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="1.5" style="display:block;margin:0 auto 12px;"><polyline points="20 6 9 17 4 12"/></svg><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">Placement Status</div><div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:12px;">Who got placed and offer details</div><span class="chip pink" style="font-size:10px;">PDF · Excel</span></div>
+        <div class="card rep-card" onclick="showToast('Feedback Analysis downloaded!','success')"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffa502" stroke-width="1.5" style="display:block;margin:0 auto 12px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">Feedback Analysis</div><div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:12px;">Sentiment and category breakdown</div><span class="chip orange" style="font-size:10px;">PDF · Excel</span></div>
+        <div class="card rep-card" onclick="showToast('Full Database Export downloaded!','success')"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#00d2ff" stroke-width="1.5" style="display:block;margin:0 auto 12px;"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">Full Data Export</div><div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:12px;">Complete database dump</div><span class="chip neutral" style="font-size:10px;">CSV · JSON</span></div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div id="page-settings" class="page">
+      <div class="page-heading">Settings</div>
+      <div class="page-subheading">Manage your profile and dashboard preferences.</div>
+      <div class="g2">
+        <div class="card">
+          <div class="section-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="form-field" style="margin:0;"><label class="form-label">Full Name</label><input class="form-input" id="sName" value="Daniel"/></div>
+            <div class="form-field" style="margin:0;"><label class="form-label">Email</label><input class="form-input" value="daniel@university.edu"/></div>
+            <div class="form-field" style="margin:0;"><label class="form-label">Branch</label><input class="form-input" value="Computer Science Engineering"/></div>
+            <div class="form-field" style="margin:0;"><label class="form-label">Academic Year</label><input class="form-input" value="Final Year — 2025"/></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <div class="card">
+            <div class="section-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Preferences</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;"><div><div style="font-size:13px;color:#fff;">Email Notifications</div><div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:3px;">Weekly progress reports</div></div><div class="toggle" id="notifToggle" style="background:linear-gradient(135deg,#00d2ff,#a855f7);" onclick="toggleNotif()"><div class="toggle-knob" style="left:23px;"></div></div></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.32);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase;">AI Recommendation Mode</div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="setAiMode(this)" style="flex:1;padding:9px;border-radius:9px;border:1px solid rgba(255,255,255,0.07);background:transparent;color:rgba(255,255,255,0.35);font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;transition:all 0.2s;">Conservative</button>
+              <button onclick="setAiMode(this)" style="flex:1;padding:9px;border-radius:9px;border:1px solid #00d2ff;background:rgba(0,210,255,0.12);color:#00d2ff;font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;font-weight:700;transition:all 0.2s;">Balanced</button>
+              <button onclick="setAiMode(this)" style="flex:1;padding:9px;border-radius:9px;border:1px solid rgba(255,255,255,0.07);background:transparent;color:rgba(255,255,255,0.35);font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;transition:all 0.2s;">Aggressive</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Account</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <button class="btn-primary" style="width:100%;padding:12px;" onclick="saveSettings()">Save Changes</button>
+              <button class="btn-secondary" style="width:100%;padding:12px;" onclick="showToast('Password reset email sent!','info')">Change Password</button>
+              <button class="btn-danger" onclick="doLogout()">Sign Out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const API_BASE = 'http://localhost:8000';
+let backendOnline = false;
+let currentRole   = 'student';
+let currentDSA    = 'medium';
+let selectedCP    = 'tech';
+let starRating    = 0;
+let toastT        = null;
+
+// ── ALL ROLES DATA ───────────────────────────────────────────────────────────
+const ALL_ROLES = [
+  // Technical
+  {cat:'tech', role:'Software Developer',  match:88, desc:'Strong DSA and React skills align well.',      required_skills:['Python','Java','Data Structures','Git','SQL','REST API'],       orgs:['Google','Microsoft','Amazon','Flipkart','Razorpay','Swiggy']},
+  {cat:'tech', role:'ML Engineer',          match:82, desc:'Python and ML background is your edge.',       required_skills:['Python','ML','TensorFlow','NumPy','Pandas','Scikit-learn'],    orgs:['Google','OpenAI','Nvidia','Samsung','Flipkart','PhonePe']},
+  {cat:'tech', role:'Data Analyst',         match:76, desc:'SQL and analytical mindset make this strong.', required_skills:['SQL','Python','Pandas','Tableau','Excel','Matplotlib'],        orgs:['Deloitte','EY','KPMG','Razorpay','Paytm','Swiggy']},
+  {cat:'tech', role:'Full Stack Developer', match:71, desc:'Build cloud skills to reach higher match.',    required_skills:['React','Node.js','JavaScript','REST API','SQL','Git'],          orgs:['Freshworks','Zoho','Infosys','TCS','Wipro','Cognizant']},
+  {cat:'tech', role:'DevOps Engineer',      match:65, desc:'Cloud and automation skills are key.',        required_skills:['Docker','Kubernetes','AWS','Linux','CI/CD','Git'],              orgs:['Amazon','Microsoft','Razorpay','CRED','Atlassian','Zepto']},
+  // Business
+  {cat:'business', role:'Business Analyst', match:78, desc:'Analytical thinking and communication shine.', required_skills:['Excel','SQL','Communication','Analytics','Presentation','JIRA'],  orgs:['McKinsey','BCG','Deloitte','Accenture','EY','KPMG']},
+  {cat:'business', role:'Product Manager',  match:74, desc:'Tech background + vision = great PM fit.',     required_skills:['Roadmapping','SQL','Communication','UX','Analytics','Agile'],    orgs:['Google','Amazon','Flipkart','Razorpay','CRED','Meesho']},
+  {cat:'business', role:'Marketing Manager',match:68, desc:'Creativity + data = modern marketing edge.',   required_skills:['Analytics','SEO','Content','Communication','Social Media','CRM'],  orgs:['Unilever','P&G','Zomato','Swiggy','CRED','Meesho']},
+  {cat:'business', role:'HR Manager',       match:62, desc:'Empathy and communication skills shine.',      required_skills:['Communication','Excel','Recruitment','People Skills','LinkedIn'],  orgs:['Infosys','Wipro','Accenture','Deloitte','IBM','Capgemini']},
+  // Entrepreneurship
+  {cat:'entrepreneur', role:'Tech Startup Founder',    match:80, desc:'Full-stack skills + problem-solving = founder DNA.', required_skills:['Product Thinking','Tech Skills','Communication','Finance','Leadership'],        orgs:['YC Startups','Sequoia Portfolio','Nexus Ventures','Matrix Partners','Kalaari']},
+  {cat:'entrepreneur', role:'Social Entrepreneur',     match:72, desc:'Impact-driven leadership opportunity.',              required_skills:['Communication','Problem Solving','Empathy','Management','Fundraising'],          orgs:['Teach for India','Pratham','Ashoka Fellows','CII','NASSCOM']},
+  {cat:'entrepreneur', role:'Freelancer / Consultant', match:75, desc:'Independent expertise in your domain.',             required_skills:['Technical Skills','Communication','Client Mgmt','Self-Marketing','Delivery'],     orgs:['Upwork','Toptal','Fiverr','LinkedIn','Freelancer.com','PeoplePerHour']},
+  // Teaching
+  {cat:'teaching', role:'Faculty / Professor',    match:70, desc:'Research + teaching passion = academic career.', required_skills:['Research','Communication','Subject Mastery','Patience','Curriculum'],     orgs:['IITs','NITs','VIT','SRM','BITS Pilani','Anna University']},
+  {cat:'teaching', role:'EdTech Content Creator', match:76, desc:'Teach online and reach thousands.',              required_skills:['Subject Mastery','Communication','Video Creation','Content Writing','SEO'], orgs:["BYJU'S",'Unacademy','Physics Wallah','Coursera','Udemy','Vedantu']},
+  {cat:'teaching', role:'Corporate Trainer',      match:67, desc:'Transform teams with your expertise.',           required_skills:['Communication','Subject Mastery','Facilitation','Empathy','Delivery'],     orgs:['Infosys Academy','TCS iON','Wipro Academy','IBM Training','Deloitte']},
+  // Creative
+  {cat:'creative', role:'UX / UI Designer',       match:73, desc:'Design thinking + tech knowledge = great fit.',  required_skills:['Figma','Sketch','User Research','Prototyping','CSS','Creativity'],       orgs:['Google','Flipkart','Zomato','CRED','Razorpay','Adobe']},
+  {cat:'creative', role:'Content Strategist',     match:66, desc:'Storytelling + analytics is powerful.',          required_skills:['Writing','SEO','Analytics','Social Media','Research','Creativity'],       orgs:['HubSpot','Zomato','Swiggy','Unacademy','Times of India','Forbes']},
+  {cat:'creative', role:'Game Developer',         match:64, desc:'Programming + creative design converge.',        required_skills:['Unity','C#','Game Design','3D Modelling','Physics','Creativity'],          orgs:['Nazara Games','nCore Games','Supercell','Dream11','MPL','Zynga']},
+  {cat:'creative', role:'Digital Media Creator',  match:58, desc:'Creative and communication skills shine.',       required_skills:['Video Editing','Scriptwriting','Communication','Social Media','Photography'],orgs:['Netflix India','Amazon Prime','YouTube','Hotstar','Zee5','MX Player']},
+  // Other
+  {cat:'other', role:'Management Consultant',     match:72, desc:'Problem-solving across all industries.',         required_skills:['Analytics','Communication','Excel','Research','Presentation','Strategy'],   orgs:['McKinsey','BCG','Bain','Deloitte','EY','KPMG']},
+  {cat:'other', role:'Civil Services Officer',    match:68, desc:'Leadership + analytical skills are essential.',  required_skills:['General Knowledge','Essay Writing','Ethics','Communication','Management'],   orgs:['UPSC','State PSC','IAS','IPS','IFS']},
+];
+
+// ── STATIC DATA ──────────────────────────────────────────────────────────────
+const TASKS = [
+  {id:1, task:'Add 2 more technical projects to your resume',         done:true,  priority:'High'},
+  {id:2, task:'Practice data structures and algorithm questions',     done:false, priority:'High'},
+  {id:3, task:'Quantify achievements in past experiences',           done:false, priority:'Medium'},
+  {id:4, task:'Contribute to 1 open-source project on GitHub',       done:true,  priority:'Medium'},
+  {id:5, task:'Complete 10 mock interview practice sessions',        done:false, priority:'High'},
+  {id:6, task:'Learn System Design fundamentals',                    done:false, priority:'Critical'},
+  {id:7, task:'Update LinkedIn profile and GitHub portfolio',        done:true,  priority:'Low'},
+];
+const PRIORITY_COLORS = {Critical:'#ff4757', High:'#f472b6', Medium:'#ffa502', Low:'#2ed573'};
+
+const SKILL_CATS = [
+  {id:'technical', label:'Technical Skills', score:72, color:'#00d2ff',
+   strengths:[{name:'Programming (Java, Python)',top:true},{name:'Teamwork'},{name:'Programming Fundamentals'},{name:'Creativity'}],
+   weaknesses:[{name:'System Design'},{name:'Deployment & DevOps'},{name:'Communication'},{name:'Lacking proficiency in System Design',warning:true}],
+   gapTable:[{skill:'Programming (Java, Python)',yours:75,industry:85,gap:10},{skill:'Data Structures & Algorithms',yours:60,industry:85,gap:25},{skill:'Database (SQL)',yours:55,industry:80,gap:25},{skill:'Web Development',yours:65,industry:85,gap:20},{skill:'API Integration',yours:50,industry:75,gap:25},{skill:'Version Control (Git)',yours:70,industry:80,gap:10}],
+   tip:'Focus on system design patterns and deploy at least 2 projects on cloud.'},
+  {id:'soft', label:'Soft Skills', score:68, color:'#ffa502',
+   strengths:[{name:'Communication'},{name:'Teamwork'},{name:'Adaptability'}],
+   weaknesses:[{name:'Leadership'},{name:'Public Speaking',warning:true}],
+   gapTable:[{skill:'Communication',yours:70,industry:85,gap:15},{skill:'Leadership',yours:50,industry:80,gap:30},{skill:'Time Management',yours:65,industry:80,gap:15},{skill:'Public Speaking',yours:45,industry:75,gap:30}],
+   tip:'Join a debate club or Toastmasters to build public speaking confidence.'},
+  {id:'cognitive', label:'Cognitive Skills', score:74, color:'#00d2ff',
+   strengths:[{name:'Problem Solving'},{name:'Critical Thinking'},{name:'Logical Reasoning'}],
+   weaknesses:[{name:'Creative Thinking'},{name:'Decision Making under Pressure',warning:true}],
+   gapTable:[{skill:'Logical Reasoning',yours:78,industry:85,gap:7},{skill:'Problem Solving',yours:72,industry:90,gap:18},{skill:'Critical Thinking',yours:70,industry:85,gap:15},{skill:'Decision Making',yours:58,industry:80,gap:22}],
+   tip:'Solve case studies weekly and practice timed problem-solving sessions.'},
+  {id:'domain', label:'Domain Skills', score:58, color:'#ff4757',
+   strengths:[{name:'Machine Learning Basics'},{name:'Data Analysis'}],
+   weaknesses:[{name:'Cloud Architecture'},{name:'MLOps'},{name:'System Design at Scale',warning:true}],
+   gapTable:[{skill:'Cloud (AWS/GCP)',yours:40,industry:80,gap:40},{skill:'MLOps',yours:35,industry:75,gap:40},{skill:'System Design',yours:45,industry:85,gap:40},{skill:'Data Engineering',yours:55,industry:80,gap:25}],
+   tip:'Get AWS Cloud Practitioner certified — it takes 2–4 weeks and is highly valued.'},
+];
+let activeSkillCat = 'technical';
+
+// ── STUDENT MOCK DATA ─────────────────────────────────────────────────────────
+const N=['Arjun Sharma','Priya Nair','Rahul Mehta','Divya Kumar','Arun Chandra','Sneha Rao','Karthik Mohan','Lakshmi P','Vijay Kumar','Ananya Sinha','Rohit Das','Meera Thomas','Surya Nair','Kavya Balan','Arjun Raj','Preethi M','Harish Verma','Nisha Gupta','Deepak Joshi','Shruti Lal','Akash Patel','Pooja Shah','Nikhil T','Ritu Agarwal','Sandeep Bose','Anjali M','Vikram Nanda','Gayathri R','Praveen K','Swathi L'];
+const D=['CSE','IT','ECE','MECH','CSE','IT','CSE','CSE','ECE','CSE','IT','MECH','CSE','IT','ECE','CSE','IT','CSE','MECH','CSE','CSE','IT','CSE','ECE','MECH','CSE','IT','CSE','ECE','CSE'];
+const CP=['Technical','Business','Creative','Entrepreneur','Technical','Education','Technical','Technical','Technical','Technical','Business','Entrepreneur','Technical','Creative','Technical','Technical','Education','Technical','Business','Technical','Technical','Technical','Creative','Business','Entrepreneur','Technical','Technical','Education','Technical','Technical'];
+const STUDENTS_DATA = N.map((name,i)=>{const score=Math.max(25,Math.min(98,30+((i*17+11)%68)));return{id:i+1,name,email:`s${i+1}@univ.edu`,dept:D[i],cgpa:(6+(i%8)*0.5).toFixed(1),score,status:score>=75?'Ready':score>=50?'In Progress':'Needs Work',career:CP[i]||'Technical'};});
+
+// ── FEEDBACK DATABASE ─────────────────────────────────────────────────────────
+const FEEDBACK_DB = [
+  {id:1,name:'Arjun Sharma',cat:'Dashboard Experience',rating:5,subject:'Great UI design!',message:'The dashboard is very intuitive and looks professional.',date:'2 hours ago',status:'pending'},
+  {id:2,name:'Priya Nair',cat:'Resume Analysis',rating:4,subject:'Skill extraction works well',message:'Very accurate. Would love more job-specific recommendations.',date:'5 hours ago',status:'pending'},
+  {id:3,name:'Rahul Mehta',cat:'Score Prediction',rating:3,subject:'Score seems lower than expected',message:'Can you explain the feature weightage more clearly?',date:'Yesterday',status:'pending'},
+  {id:4,name:'Divya Kumar',cat:'Career Recommendations',rating:5,subject:'Non-tech roles are a great addition!',message:'Love that it now suggests business and creative paths.',date:'2 days ago',status:'resolved'},
+  {id:5,name:'Arun C',cat:'General',rating:2,subject:'Action plan too generic',message:'Need more personalised suggestions based on specific gaps.',date:'3 days ago',status:'resolved'},
+];
+let myFbs = [];
+
+// ── PARTICLES ─────────────────────────────────────────────────────────────────
+(function initParticles(){
+  const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
+  const resize=()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;};
+  resize();window.addEventListener('resize',resize);
+  const pts=Array.from({length:90},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.4+0.3,vx:(Math.random()-0.5)*0.28,vy:(Math.random()-0.5)*0.28,a:Math.random()*0.5+0.12,c:Math.random()>0.5?'#00d2ff':'#a855f7'}));
+  (function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.c;ctx.globalAlpha=p.a;ctx.fill();});ctx.globalAlpha=1;pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<110){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle='#00d2ff';ctx.globalAlpha=(1-d/110)*0.07;ctx.lineWidth=0.5;ctx.stroke();}}));ctx.globalAlpha=1;requestAnimationFrame(draw);})();
+})();
+
+// ── BACKEND CHECK ──────────────────────────────────────────────────────────────
+async function checkBackend(){try{const r=await fetch(API_BASE+'/health',{signal:AbortSignal.timeout(2500)});if(r.ok){backendOnline=true;document.getElementById('apiStatus').className='api-status online';document.getElementById('apiDot').className='api-dot online';document.getElementById('apiStatusText').textContent='Backend Online';}}catch(e){backendOnline=false;}}
+checkBackend();
+
+// ── TOAST ──────────────────────────────────────────────────────────────────────
+function showToast(msg,type){type=type||'info';const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>t.style.display='none',3000);}
+
+// ── CAREER PATH SELECTOR ───────────────────────────────────────────────────────
+function selectCP(id,btn){selectedCP=id;document.querySelectorAll('.cp-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+
+// ── AUTH ───────────────────────────────────────────────────────────────────────
+function setRole(r){currentRole=r;document.getElementById('roleStudentBtn').classList.toggle('active',r==='student');document.getElementById('roleAdminBtn').classList.toggle('active',r==='admin');}
+function setAuthMode(mode,el){
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  const isSignup=mode==='signup';
+  document.getElementById('signupExtra').style.display=isSignup?'block':'none';
+  document.getElementById('cgpaExtra').style.display=(isSignup&&currentRole==='student')?'block':'none';
+  document.getElementById('careerPathSection').style.display=(isSignup&&currentRole==='student')?'block':'none';
+  document.getElementById('loginSubmitBtn').textContent=isSignup?'Create Account':'Launch Dashboard';
+}
+
+async function doLogin(){
+  const btn=document.getElementById('loginSubmitBtn');
+  btn.textContent='Authenticating...';btn.disabled=true;
+  try{if(backendOnline){await fetch(API_BASE+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('loginEmail').value||'demo@uni.edu',password:'***',role:currentRole})});}}catch(e){}
+  setTimeout(()=>{
+    btn.textContent='Launch Dashboard';btn.disabled=false;
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('appShell').style.display='flex';
+    if(currentRole==='admin'){
+      document.querySelectorAll('.adm-nav').forEach(el=>el.style.display='flex');
+      document.querySelectorAll('.stu-nav').forEach(el=>el.style.display='none');
+      document.getElementById('sfName').textContent='Placement Admin';
+      document.getElementById('sfSub').textContent='Placement Cell';
+      document.getElementById('sfBadge').textContent='Batch 2025';
+      updateAdminStats();renderStudentsTable();renderAdminFb();
+      navigate('admin',document.querySelector('[data-page="admin"]'));
+    } else {
+      const cpLabels={tech:'Technical / IT Track',business:'Business Track',entrepreneur:'Entrepreneur Track',teaching:'Teaching Track',creative:'Creative Track',other:'Other Professions Track'};
+      document.getElementById('dashTrackLabel').textContent=cpLabels[selectedCP]||'Technical / IT Track';
+      renderDashTaskGrid();filterRoles('all',document.querySelector('.cf-tab'));renderSkillPage();renderActionPlan();
+      navigate('dashboard',document.querySelector('[data-page="dashboard"]'));
+    }
+  },1100);
+}
+function doLogout(){document.getElementById('appShell').style.display='none';document.getElementById('loginPage').style.display='flex';document.querySelectorAll('.adm-nav').forEach(el=>el.style.display='none');document.querySelectorAll('.stu-nav').forEach(el=>el.style.display='flex');}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────────────
+function navigate(pageId,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const page=document.getElementById('page-'+pageId);if(page)page.classList.add('active');
+  if(btn){btn.classList.add('active');}else{const b=document.querySelector(`[data-page="${pageId}"]`);if(b)b.classList.add('active');}
+  if(pageId==='fbadmin'){updateAdminStats();renderAdminFb();}
+  if(pageId==='students'){renderStudentsTable();}
+  if(pageId==='admin'){updateAdminStats();}
+}
+
+// ── TASKS ──────────────────────────────────────────────────────────────────────
+function renderDashTaskGrid(){
+  const grid=document.getElementById('dashTaskGrid');if(!grid)return;grid.innerHTML='';
+  TASKS.forEach(item=>{
+    const div=document.createElement('div');div.className='task-item'+(item.done?' done':'');div.onclick=()=>toggleTask(item.id);
+    const pc=PRIORITY_COLORS[item.priority];
+    div.innerHTML=`<div class="checkbox${item.done?' checked':''}">${item.done?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>':''}</div><span style="font-size:12px;flex:1;color:${item.done?'rgba(255,255,255,0.28)':'rgba(255,255,255,0.75)'};text-decoration:${item.done?'line-through':'none'};">${item.task}</span><span class="priority-badge" style="background:${pc}22;color:${pc};">${item.priority}</span>`;
+    grid.appendChild(div);
+  });syncProgress();
+}
+function toggleTask(id){const t=TASKS.find(t=>t.id===id);if(t){t.done=!t.done;renderDashTaskGrid();renderActionPlan();}}
+function completeAllTasks(){TASKS.forEach(t=>t.done=true);renderDashTaskGrid();renderActionPlan();}
+function syncProgress(){
+  const done=TASKS.filter(t=>t.done).length,total=TASKS.length,pct=Math.round(done/total*100);
+  const dpf=document.getElementById('dashProgFill');if(dpf)dpf.style.width=pct+'%';
+  const dtc=document.getElementById('dashTaskCount');if(dtc)dtc.textContent=done+' / '+total+' completed';
+  const apf=document.getElementById('apProgFill');if(apf)apf.style.width=pct+'%';
+  const apc=document.getElementById('apCount');if(apc)apc.textContent=done+'/'+total;
+  const app=document.getElementById('apPercent');if(app)app.textContent=pct+'% Complete';
+}
+function renderActionPlan(){
+  const c=document.getElementById('actionPlanContainer');if(!c)return;c.innerHTML='';
+  const groups={Critical:[],High:[],Medium:[],Low:[]};TASKS.forEach(t=>{if(groups[t.priority])groups[t.priority].push(t);});
+  ['Critical','High','Medium','Low'].forEach(priority=>{
+    if(!groups[priority].length)return;const pc=PRIORITY_COLORS[priority];
+    const divider=document.createElement('div');divider.style.cssText=`display:flex;align-items:center;gap:9px;font-size:10px;color:${pc};letter-spacing:2.5px;text-transform:uppercase;margin:18px 0 10px;`;
+    divider.innerHTML=`<div style="height:1px;flex:1;background:${pc}2a;"></div>${priority} Priority<div style="height:1px;flex:1;background:${pc}2a;"></div>`;c.appendChild(divider);
+    groups[priority].forEach(item=>{
+      const el=document.createElement('div');el.className='task-item'+(item.done?' done':'');el.style.marginBottom='9px';el.onclick=()=>toggleTask(item.id);
+      el.innerHTML=`<div class="checkbox${item.done?' checked':''}" style="width:22px;height:22px;border-radius:7px;border-color:${item.done?'#2ed573':pc};">${item.done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>':''}</div><span style="font-size:13px;flex:1;color:${item.done?'rgba(255,255,255,0.28)':'#fff'};text-decoration:${item.done?'line-through':'none'};">${item.task}</span>`;
+      c.appendChild(el);
+    });
+  });syncProgress();
+}
+
+// ── CAREER MATCH / ROLES ───────────────────────────────────────────────────────
+let activeCF='all';
+function filterRoles(cat,btn){
+  activeCF=cat;
+  document.querySelectorAll('.cf-tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderRoles(cat);
+}
+function renderRoles(catFilter){
+  const cat=catFilter||activeCF||'all';
+  let roles=cat==='all'?ALL_ROLES:ALL_ROLES.filter(r=>r.cat===cat);
+  if(!roles.length)roles=ALL_ROLES.slice(0,4);
+  const grid=document.getElementById('rolesGrid');if(!grid)return;grid.innerHTML='';
+  const CC={tech:'#00d2ff',business:'#a855f7',entrepreneur:'#2ed573',teaching:'#ffa502',creative:'#f472b6',other:'#fb923c'};
+  roles.slice(0,6).forEach((r,i)=>{
+    const col=CC[r.cat]||'#a855f7';
+    const bar=i===0?`linear-gradient(90deg,${col},#2ed573)`:`linear-gradient(90deg,${col}88,${col})`;
+    const card=document.createElement('div');card.className='card hover'+(i===0?' glow':'');card.style.marginBottom='0';
+    card.onmouseenter=()=>card.style.transform='translateY(-3px)';card.onmouseleave=()=>card.style.transform='';
+    card.innerHTML=`<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;"><div><div style="font-size:14px;font-family:'Orbitron',monospace;font-weight:700;color:#fff;margin-bottom:4px;">${r.role}${i===0?` <span style="padding:2px 8px;background:${col}22;color:${col};border-radius:6px;font-size:8px;font-family:'Syne',sans-serif;font-weight:700;border:1px solid ${col}44;vertical-align:middle;">BEST FIT</span>`:''}</div><div style="font-size:11px;color:rgba(255,255,255,0.38);">${r.desc}</div></div><div style="font-size:18px;font-family:'Orbitron',monospace;font-weight:900;color:${col};flex-shrink:0;margin-left:10px;">${r.match}%</div></div><div style="height:6px;background:rgba(255,255,255,0.05);border-radius:4px;margin-bottom:10px;"><div style="height:100%;width:${r.match}%;border-radius:4px;background:${bar};transition:width 1s;"></div></div><div style="display:flex;flex-wrap:wrap;gap:4px;">${r.required_skills.slice(0,4).map(s=>`<span class="chip neutral" style="font-size:10px;padding:3px 8px;">${s}</span>`).join('')}</div>`;
+    grid.appendChild(card);
+  });
+  // Update companies card
+  if(roles[0]){
+    const cl=document.getElementById('companiesList');if(cl)cl.innerHTML=(roles[0].orgs||[]).map(o=>`<span class="chip neutral">${o}</span>`).join('');
+    const lbl=document.getElementById('companiesLabel');if(lbl)lbl.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Top Organisations for ${roles[0].role}`;
+  }
+}
+
+// ── SKILL PAGE ─────────────────────────────────────────────────────────────────
+function renderSkillPage(){renderSkillCatCards();renderSkillDetails();renderSkillAccordion();}
+function renderSkillCatCards(){
+  const g=document.getElementById('skillCatCards');if(!g)return;g.innerHTML='';
+  SKILL_CATS.forEach(cat=>{
+    const isActive=cat.id===activeSkillCat;const div=document.createElement('div');div.className='card'+(isActive?' glow':'');
+    div.style.cssText=`cursor:pointer;padding:20px;border-color:${isActive?cat.color+'50':'rgba(255,255,255,0.08)'};transition:all 0.2s;`;
+    div.onclick=()=>{activeSkillCat=cat.id;renderSkillPage();};
+    div.innerHTML=`<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:14px;">${cat.label}</div><div style="font-size:30px;font-family:'Orbitron',monospace;font-weight:900;color:#fff;margin-bottom:12px;">${cat.score}%</div><div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;"><div style="height:100%;width:${cat.score}%;background:${cat.color};border-radius:4px;box-shadow:0 0 8px ${cat.color}50;"></div></div>`;
+    g.appendChild(div);
+  });
+}
+function renderSkillDetails(){
+  const cat=SKILL_CATS.find(c=>c.id===activeSkillCat)||SKILL_CATS[0];
+  const sl=document.getElementById('strengthsList'),wl=document.getElementById('weaknessesList');
+  if(sl){sl.innerHTML='';cat.strengths.forEach(s=>{sl.innerHTML+=`<div class="sw-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ed573" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>${s.name}</span>${s.top?'<span style="font-size:9px;padding:2px 8px;background:rgba(255,193,7,0.14);color:#ffc107;border-radius:20px;border:1px solid rgba(255,193,7,0.2);">Top Skill</span>':''}</div>`;});}
+  if(wl){wl.innerHTML='';cat.weaknesses.forEach(w=>{wl.innerHTML+=`<div class="sw-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${w.warning?'#ffa502':'#ff4757'}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span style="color:rgba(255,255,255,0.62);">${w.name}</span></div>`;});}
+}
+function renderSkillAccordion(){
+  const c=document.getElementById('skillAccordion');if(!c)return;c.innerHTML='';
+  const gc=g=>g>=35?'#ff4757':g>=20?'#e07028':g>=12?'#ffa502':'#2ed573';
+  SKILL_CATS.forEach(cat=>{
+    const isOpen=cat.id===activeSkillCat;const wrap=document.createElement('div');wrap.style.marginBottom='10px';
+    const hd=document.createElement('div');hd.className='accordion-hd'+(isOpen?' open':'');hd.style.borderColor=isOpen?cat.color+'44':'rgba(255,255,255,0.07)';
+    hd.innerHTML=`<span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:#fff;">${cat.label}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"><polyline points="${isOpen?'18 15 12 9 6 15':'6 9 12 15 18 9'}"/></svg>`;
+    hd.onclick=()=>{activeSkillCat=isOpen?'':cat.id;renderSkillPage();};wrap.appendChild(hd);
+    if(isOpen){
+      const bd=document.createElement('div');bd.className='accordion-bd';
+      const rows=cat.gapTable.map(row=>`<div class="gap-row"><span style="font-size:13px;color:rgba(255,255,255,0.75);">${row.skill}</span><span class="gap-badge cyan">${row.yours}%</span><span style="font-size:13px;color:rgba(255,255,255,0.42);">${row.industry}%</span><span class="gap-badge" style="background:${gc(row.gap)}22;color:${gc(row.gap)};">${row.gap}%</span></div>`).join('');
+      bd.innerHTML=`<div class="gap-header">${['Required Skill','Your Level','Industry Std.','Gap'].map(h=>`<div style="font-size:11px;color:rgba(255,255,255,0.38);font-weight:700;letter-spacing:0.5px;">${h}</div>`).join('')}</div>${rows}<div style="padding:10px 20px;font-size:12px;color:rgba(255,255,255,0.28);font-style:italic;">→ ${cat.tip}</div>`;
+      wrap.appendChild(bd);
+    }c.appendChild(wrap);
+  });
+}
+
+// ── RESUME ─────────────────────────────────────────────────────────────────────
+function handleResumeDrop(e){e.preventDefault();const dz=document.getElementById('dropZone');dz.style.borderColor='rgba(255,255,255,0.1)';dz.style.background='rgba(255,255,255,0.02)';const f=e.dataTransfer.files[0];if(f)processResume(f);}
+function handleResumeFile(inp){const f=inp.files[0];if(f)processResume(f);}
+async function processResume(file){
+  document.getElementById('resumeFileName').style.display='block';document.getElementById('resumeFileName').textContent='Loaded: '+file.name;
+  document.getElementById('resumeProcessing').style.display='block';document.getElementById('resumeResults').innerHTML='';
+  let data=null;
+  if(backendOnline){try{const fd=new FormData();fd.append('file',file);const r=await fetch(API_BASE+'/upload_resume',{method:'POST',body:fd});data=await r.json();}catch(e){}}
+  if(!data){await new Promise(r=>setTimeout(r,2200));data={skills:['Python','React','SQL','Machine Learning','FastAPI','Git','NumPy','Pandas'],readiness_score:76,model_confidence:91.4,suggestions:['Add a cloud certification (AWS/Azure/GCP) — highly valued by recruiters.','Include system design projects to demonstrate architectural thinking.','List DevOps tools (Docker, CI/CD pipelines) in your skills section.','Secure at least one internship to strengthen practical experience.']};}
+  document.getElementById('resumeProcessing').style.display='none';
+  const score=data.readiness_score||data.score||76,conf=data.model_confidence||91.4,suggs=data.suggestions||[];
+  const label=score>=75?'Placement Ready':score>=55?'In Progress':'Needs Improvement';
+  const lcol=score>=75?'#2ed573':score>=55?'#ffa502':'#ff4757';
+  document.getElementById('resumeResults').innerHTML=`<div style="display:flex;flex-direction:column;gap:18px;"><div style="display:flex;align-items:center;gap:16px;padding:18px;background:rgba(0,210,255,0.07);border-radius:13px;border:1px solid rgba(0,210,255,0.2);"><div><div style="font-size:38px;font-family:'Orbitron',monospace;font-weight:900;color:#00d2ff;line-height:1;">${score}</div><div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-top:4px;">/ 100</div></div><div><div style="color:#fff;font-weight:700;font-size:15px;">Predicted Readiness Score</div><div style="color:${lcol};font-size:12px;margin-top:4px;font-weight:700;">${label}</div><div style="color:rgba(255,255,255,0.35);font-size:11px;margin-top:3px;">AI Confidence: ${conf}%</div></div></div><div><div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase;">Extracted Skills</div><div>${(data.skills||[]).map(s=>`<span class="chip purple">${s}</span>`).join('')}</div></div><div><div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase;">AI Recommendations</div>${suggs.map(s=>`<div style="padding:8px 12px;font-size:13px;color:rgba(255,255,255,0.68);display:flex;gap:9px;align-items:flex-start;"><span style="color:#00d2ff;flex-shrink:0;font-weight:700;">→</span>${s}</div>`).join('')}</div></div>`;
+  showToast('Resume analyzed successfully!','success');
+}
+
+// ── PREDICT ─────────────────────────────────────────────────────────────────────
+function setDSA(level,btn){currentDSA=level;document.querySelectorAll('.dsa-btn').forEach(b=>{b.style.borderColor='rgba(255,255,255,0.08)';b.style.background='transparent';b.style.color='rgba(255,255,255,0.38)';b.style.fontWeight='400';});btn.style.borderColor='#00d2ff';btn.style.background='rgba(0,210,255,0.12)';btn.style.color='#00d2ff';btn.style.fontWeight='700';}
+async function runPrediction(){
+  const btn=document.getElementById('predictBtn');btn.textContent='Predicting...';btn.disabled=true;
+  const cgpa=parseFloat(document.getElementById('pCgpa').value)||7;
+  const projects=parseInt(document.getElementById('pProjects').value)||0;
+  const internships=parseInt(document.getElementById('pInternships').value)||0;
+  const certs=parseInt(document.getElementById('pCerts').value)||0;
+  const skills=document.getElementById('pSkills').value.split(',').map(s=>s.trim()).filter(Boolean);
+  let data=null;
+  if(backendOnline){try{const r=await fetch(API_BASE+'/predict_readiness',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cgpa,projects,internships,certifications:certs,skills,dsa_level:currentDSA})});data=await r.json();}catch(e){}}
+  if(!data){
+    await new Promise(r=>setTimeout(r,1400));
+    const dsaScore=currentDSA==='easy'?0:currentDSA==='medium'?5:10;
+    const raw=Math.min(cgpa*4.8+projects*3.5+internships*7+certs*2.5+skills.length*1.4+dsaScore+5,99);
+    const score=Math.round(raw*10)/10;
+    data={score,label:score>=80?'Excellent — Top Candidate':score>=65?'Good — Placement Ready':score>=50?'Average — Needs Improvement':'Below Average',
+    breakdown:{'Academic (CGPA)':Math.min(cgpa*4.8,48).toFixed(1),'Projects':Math.min(projects*3.5,28).toFixed(1),'Internships':Math.min(internships*7,21).toFixed(1),'Certifications':Math.min(certs*2.5,17).toFixed(1),'Skills Breadth':Math.min(skills.length*1.4,22).toFixed(1),'DSA Proficiency':dsaScore.toString()},
+    improvement_tips:[cgpa<7.5?'Improve CGPA — target above 7.5 for tier-1 shortlisting.':null,projects<3?'Build at least 3 end-to-end projects with GitHub documentation.':null,internships===0?'Complete at least one internship for industry exposure.':null,currentDSA!=='hard'?'Level up DSA — solve 100+ LeetCode medium/hard problems.':null,skills.length<8?'Expand skills: learn cloud (AWS/GCP) and DevOps tools.':null].filter(Boolean)};
+  }
+  btn.textContent='Predict My Score';btn.disabled=false;
+  const score=data.score||0,label=data.label||'',breakdown=data.breakdown||{},tips=data.improvement_tips||[];
+  const scoreColor=score>=75?'#2ed573':score>=50?'#ffa502':'#ff4757';
+  const bHTML=Object.entries(breakdown).map(([k,v])=>`<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:5px;"><span>${k}</span><span style="color:#00d2ff;font-weight:700;">${v}</span></div><div class="prog-track"><div class="prog-fill" style="width:${Math.min(Math.round(parseFloat(v)/50*100),100)}%;"></div></div></div>`).join('');
+  const tHTML=tips.length?`<div><div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase;">Improvement Tips</div>${tips.map(t=>`<div style="padding:7px 10px;font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px;"><span style="color:#ffa502;flex-shrink:0;">→</span>${t}</div>`).join('')}</div>`:'';
+  document.getElementById('predictResults').innerHTML=`<div style="display:flex;flex-direction:column;gap:18px;"><div style="text-align:center;padding:20px 0;"><div style="font-size:52px;font-family:'Orbitron',monospace;font-weight:900;color:${scoreColor};line-height:1;">${score}</div><div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1.5px;margin:4px 0 8px;">/ 100</div><div style="font-size:13px;color:${scoreColor};font-weight:700;">${label}</div></div><div><div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:12px;text-transform:uppercase;">Score Breakdown</div>${bHTML}</div>${tHTML}</div>`;
+  showToast('Prediction complete!','success');
+}
+
+// ── FEEDBACK (student) ──────────────────────────────────────────────────────────
+function setStar(n){starRating=n;document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('lit',i<n));}
+async function submitFeedback(){
+  if(!starRating){showToast('Please select a rating','error');return;}
+  const subject=document.getElementById('fbSubject').value,message=document.getElementById('fbMessage').value;
+  if(!subject||!message){showToast('Please fill subject and message','error');return;}
+  const fb={id:Date.now(),name:'Daniel',cat:document.getElementById('fbCat').options[document.getElementById('fbCat').selectedIndex].text,rating:starRating,subject,message,date:'Just now',status:'pending'};
+  if(backendOnline){try{await fetch(API_BASE+'/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(fb)});}catch(e){}}
+  myFbs.unshift(fb);FEEDBACK_DB.unshift(fb);
+  document.getElementById('fbSubject').value='';document.getElementById('fbMessage').value='';setStar(0);
+  renderMyFb();updateAdminStats();showToast('Feedback submitted! Thank you.','success');
+}
+function renderMyFb(){
+  const c=document.getElementById('myFbList');if(!c)return;
+  if(!myFbs.length){c.innerHTML='<div style="padding:20px 0;text-align:center;font-size:12px;color:rgba(255,255,255,0.2);">No feedback submitted yet</div>';return;}
+  c.innerHTML=myFbs.map(f=>`<div class="fb-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;"><span style="font-size:12px;font-weight:700;color:#fff;">${f.subject}</span><span style="color:#ffc107;font-size:13px;">${'★'.repeat(f.rating)}</span></div><div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:4px;">${f.cat}</div><div style="font-size:11px;color:rgba(255,255,255,0.55);">${f.message.substring(0,80)}${f.message.length>80?'...':''}</div><div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:6px;">${f.date}</div></div>`).join('');
+}
+
+// ── ADMIN STATS ─────────────────────────────────────────────────────────────────
+function updateAdminStats(){
+  const total=FEEDBACK_DB.length,pending=FEEDBACK_DB.filter(f=>f.status==='pending').length,resolved=FEEDBACK_DB.filter(f=>f.status==='resolved').length;
+  const avg=total?Math.round(FEEDBACK_DB.reduce((s,f)=>s+f.rating,0)/total*10)/10:0;
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('adminFbTotal',total);set('adminFbAvg',avg+' ★');set('adminPendingAct',pending+' feedback submissions pending');set('fbPendingBadge','('+pending+' pending)');
+  set('fbAdTotal',total);set('fbAdPending',pending);set('fbAdResolved',resolved);set('fbAdAvg',avg+' ★');
+  // Rating bars
+  const rb=document.getElementById('fbRatingBars');
+  if(rb){const COLS={5:'#639922',4:'#378add',3:'#ef9f27',2:'#f0997b',1:'#e24b4a'};rb.innerHTML=[5,4,3,2,1].map(n=>{const cnt=FEEDBACK_DB.filter(f=>f.rating===n).length,w=total?Math.round(cnt/total*100):0;return`<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:4px;"><span>${n} stars</span><strong style="color:${COLS[n]};">${cnt}</strong></div><div style="height:7px;background:rgba(255,255,255,0.05);border-radius:4px;"><div style="height:100%;width:${w}%;background:${COLS[n]};border-radius:4px;"></div></div></div>`;}).join('');}
+  // Cat breakdown
+  const cb=document.getElementById('fbCatBreakdown');
+  if(cb){const cats={};FEEDBACK_DB.forEach(f=>{cats[f.cat]=(cats[f.cat]||0)+1;});cb.innerHTML=Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,0.03);border-radius:9px;margin-bottom:6px;"><span style="font-size:12px;color:rgba(255,255,255,0.7);">${k}</span><span style="padding:2px 9px;border-radius:20px;background:rgba(0,210,255,0.12);color:#00d2ff;font-size:10px;font-weight:700;">${v}</span></div>`).join('');}
+}
+
+// ── ADMIN FEEDBACK LIST ──────────────────────────────────────────────────────────
+function renderAdminFb(){
+  updateAdminStats();
+  const filter=(document.getElementById('fbStatusFilter')||{}).value||'';
+  const list=filter?FEEDBACK_DB.filter(f=>f.status===filter):FEEDBACK_DB;
+  const c=document.getElementById('fbAdminList');if(!c)return;
+  c.innerHTML=list.map(f=>{
+    const stars='★'.repeat(f.rating)+'☆'.repeat(5-f.rating);
+    const bc=f.status==='pending'?'a-badge yellow':'a-badge green';
+    const acts=f.status==='pending'
+      ?`<button onclick="resolveFb(${f.id})" style="padding:5px 12px;background:linear-gradient(135deg,#00d2ff,#a855f7);border:none;border-radius:8px;color:#fff;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;cursor:pointer;margin-right:7px;">Mark Resolved</button><button onclick="showToast('Reply sent!','success')" style="padding:5px 12px;background:transparent;border:1px solid rgba(0,210,255,0.3);border-radius:8px;color:#00d2ff;font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;">Reply</button>`
+      :`<span style="font-size:11px;color:#2ed573;font-weight:700;">Resolved</span>`;
+    return`<div class="fb-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;"><div style="display:flex;align-items:center;gap:10px;"><span style="font-size:13px;font-weight:700;color:#fff;">${f.name}</span><span class="${bc}">${f.status}</span></div><span style="color:#ffc107;font-size:13px;">${stars}</span></div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;">${f.cat} · ${f.date}</div><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.8);margin-bottom:4px;">${f.subject}</div><div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:9px;">${f.message}</div><div>${acts}</div></div>`;
+  }).join('');
+}
+function resolveFb(id){const fb=FEEDBACK_DB.find(f=>f.id===id);if(fb){fb.status='resolved';renderAdminFb();updateAdminStats();showToast('Feedback marked as resolved','success');}}
+
+// ── STUDENTS TABLE ───────────────────────────────────────────────────────────────
+let filteredStudents=[...STUDENTS_DATA];
+function filterStudents(){
+  const q=document.getElementById('stuSearch').value.toLowerCase(),sf=document.getElementById('stuScoreF').value,df=document.getElementById('stuDeptF').value;
+  filteredStudents=STUDENTS_DATA.filter(s=>{
+    const mq=!q||s.name.toLowerCase().includes(q)||s.email.includes(q)||s.dept.toLowerCase().includes(q);
+    const ms=!sf||(sf==='high'&&s.score>=75)||(sf==='mid'&&s.score>=50&&s.score<75)||(sf==='low'&&s.score<50);
+    const md=!df||s.dept===df;return mq&&ms&&md;
+  });renderStudentsTable();
+}
+function renderStudentsTable(){
+  const b=document.getElementById('stuBody');if(!b)return;
+  const lbl=document.getElementById('stuCountLabel');if(lbl)lbl.textContent='Showing '+filteredStudents.length+' students';
+  const sc=s=>s>=75?'#2ed573':s>=50?'#ffa502':'#ff4757';
+  const bc=st=>st==='Ready'?'a-badge green':st==='In Progress'?'a-badge blue':'a-badge red';
+  b.innerHTML=filteredStudents.map(s=>`<tr><td style="color:#fff;font-weight:500;">${s.name}<div style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:400;">${s.email}</div></td><td><span style="padding:2px 9px;border-radius:20px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);font-size:10px;">${s.dept}</span></td><td style="font-weight:700;color:#00d2ff;">${s.cgpa}</td><td style="font-size:15px;font-weight:900;font-family:'Orbitron',monospace;color:${sc(s.score)};">${s.score}</td><td><span class="${bc(s.status)}">${s.status}</span></td><td style="font-size:11px;color:rgba(255,255,255,0.5);">${s.career}</td><td><button onclick="showToast('Viewing ${s.name.replace(/'/g,"\\'")}...','info')" style="padding:4px 11px;background:transparent;border:1px solid rgba(0,210,255,0.3);border-radius:8px;color:#00d2ff;font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;">View</button></td></tr>`).join('');
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────────────────────────
+let notifOn=true;
+function toggleNotif(){notifOn=!notifOn;const t=document.getElementById('notifToggle');t.style.background=notifOn?'linear-gradient(135deg,#00d2ff,#a855f7)':'rgba(255,255,255,0.1)';t.querySelector('.toggle-knob').style.left=notifOn?'23px':'3px';}
+function setAiMode(btn){document.querySelectorAll('[onclick="setAiMode(this)"]').forEach(b=>{b.style.borderColor='rgba(255,255,255,0.07)';b.style.background='transparent';b.style.color='rgba(255,255,255,0.35)';b.style.fontWeight='400';b.style.fontSize='11px';});btn.style.borderColor='#00d2ff';btn.style.background='rgba(0,210,255,0.12)';btn.style.color='#00d2ff';btn.style.fontWeight='700';btn.style.fontSize='12px';}
+function saveSettings(){const name=document.getElementById('sName').value;document.getElementById('sfName').textContent=name;document.getElementById('dashWelcome').textContent='Welcome back, '+name;showToast('Profile saved!','success');}
+</script>
+</body>
+</html>
